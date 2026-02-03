@@ -1,6 +1,6 @@
 # 🚀 CAP785: Web Performance Optimization - Complete Guide
 
-> **A comprehensive guide covering all course units, practicals, and techniques for building faster websites.**
+> **A comprehensive, beginner-friendly guide to making websites faster. Every concept is explained in simple language.**
 
 ---
 
@@ -33,2979 +33,1812 @@
 
 ### What is Web Performance?
 
-Web performance is the **speed and efficiency** with which web pages are downloaded and displayed in the user's browser.
+**Web performance** refers to how quickly a website loads and becomes usable. Think of it like a restaurant - customers don't like waiting too long for their food, and website visitors don't like waiting for pages to load.
 
-```
-Why Performance Matters:
+> **Simple Definition:** Web performance is the speed at which your website downloads, displays content, and responds to user actions.
 
-User Experience:        Business Impact:         SEO Impact:
-├── First impressions   ├── Conversion rates     ├── Google ranking
-├── Engagement          ├── Bounce rates         ├── Core Web Vitals
-├── Retention           ├── Revenue              ├── Mobile-first indexing
-└── Satisfaction        └── Customer loyalty     └── Crawl budget
-```
+### Why Does Web Performance Matter?
 
-### Key Performance Metrics
+#### 1. User Experience
 
-```mermaid
-flowchart TB
-    PM[Performance Metrics]
-    PM --> L[Loading]
-    PM --> I[Interactivity]
-    PM --> VS[Visual Stability]
-    PM --> C[Custom]
-    
-    L --> TTFB[TTFB]
-    L --> FCP[FCP]
-    L --> LCP[LCP]
-    
-    I --> FID[FID]
-    I --> INP[INP]
-    I --> TBT[TBT]
-    
-    VS --> CLS[CLS]
-    
-    C --> SI[Speed Index]
-    C --> TTI[TTI]
-```
+- **53% of mobile users** leave a website if it takes more than 3 seconds to load
+- Slow websites feel frustrating and unprofessional
+- Fast websites feel modern and trustworthy
 
-### Core Web Vitals
+#### 2. Business Impact
 
-| Metric | Measures | Good | Needs Work | Poor |
-|--------|----------|------|------------|------|
-| **LCP** | Largest Contentful Paint | ≤ 2.5s | 2.5-4s | > 4s |
-| **INP** | Interaction to Next Paint | ≤ 200ms | 200-500ms | > 500ms |
-| **CLS** | Cumulative Layout Shift | ≤ 0.1 | 0.1-0.25 | > 0.25 |
+- **Amazon** found that every 100ms delay cost them 1% in sales
+- **Google** discovered that a 0.5 second delay caused 20% drop in traffic
+- Fast websites have higher **conversion rates** (visitors becoming customers)
+
+#### 3. SEO (Search Engine Optimization)
+
+- **Google uses page speed as a ranking factor**
+- Slower websites rank lower in search results
+- Core Web Vitals are now part of Google's ranking algorithm
+
+### Understanding Key Performance Terms
+
+Let's break down all the important terms you'll encounter:
 
 ---
 
-## 1.2 Getting Up and Running
+## 1.2 Performance Metrics Explained (In Simple Language)
 
-### Performance Optimization Workflow
+### Loading Metrics - How Fast Content Appears
 
-```mermaid
-flowchart TD
-    A[1. Audit] --> B[2. Analyze]
-    B --> C[3. Prioritize]
-    C --> D[4. Optimize]
-    D --> E[5. Measure]
-    E --> F{Improved?}
-    F -->|Yes| G[Monitor]
-    F -->|No| B
-    G --> A
-```
+#### TTFB (Time to First Byte)
+>
+> **What it means:** How long it takes for the server to send the first piece of data to your browser.
 
-### Setting Up Your Environment
+**Analogy:** Imagine ordering food at a restaurant. TTFB is like seeing the waiter walk toward your table - you know food is coming, but haven't seen it yet.
 
-```bash
-# Essential tools to install
-npm install -g lighthouse
-npm install -g http-server
-npm install -g pagespeed-insights
+**Good TTFB:** Less than 800 milliseconds (0.8 seconds)
 
-# Chrome DevTools - Built-in (F12)
-# WebPageTest - Online tool
-```
+**What affects TTFB:**
+
+- Server processing speed
+- Database queries
+- Network distance between user and server
 
 ---
 
-## 1.3 Auditing the Client's Website
+#### FCP (First Contentful Paint)
+>
+> **What it means:** When the first text, image, or visible element appears on screen.
 
-### Comprehensive Audit Checklist
+**Analogy:** It's like seeing the menu placed on your table - now you know the restaurant is actually working on serving you.
 
-```
-Pre-Audit Checklist:
-├── [ ] Document current performance baseline
-├── [ ] Identify target pages (homepage, product, checkout)
-├── [ ] Note user demographics (devices, locations, networks)
-├── [ ] Set performance budget goals
-└── [ ] Gather stakeholder requirements
+**Good FCP:** Less than 1.8 seconds
 
-Audit Areas:
-├── Loading Performance
-│   ├── Time to First Byte (TTFB)
-│   ├── First Contentful Paint (FCP)
-│   └── Largest Contentful Paint (LCP)
-├── Interactivity
-│   ├── Input delay
-│   └── JavaScript execution time
-├── Visual Stability
-│   └── Layout shifts
-├── Resource Optimization
-│   ├── Image sizes
-│   ├── JavaScript bundles
-│   └── CSS files
-└── Network
-    ├── Request count
-    ├── Total page weight
-    └── Caching headers
-```
+**What it measures:**
 
-### Creating a Performance Budget
-
-```javascript
-// Example performance budget
-const performanceBudget = {
-    metrics: {
-        LCP: 2500,           // ms
-        FID: 100,            // ms
-        CLS: 0.1,            // score
-        TTI: 3500,           // ms
-        SpeedIndex: 3000     // ms
-    },
-    resources: {
-        totalSize: 500,      // KB
-        javascript: 150,     // KB
-        css: 50,             // KB
-        images: 250,         // KB
-        fonts: 50            // KB
-    },
-    counts: {
-        requests: 50,
-        scripts: 10,
-        stylesheets: 3
-    }
-};
-```
+- When the user sees *something* on the page
+- Does NOT mean the page is fully loaded
+- First sign of progress for the user
 
 ---
 
-## 1.4 Google PageSpeed Insights
+#### LCP (Largest Contentful Paint) ⭐ Core Web Vital
+>
+> **What it means:** When the biggest visible element (usually hero image or main heading) finishes loading.
 
-### What is PageSpeed Insights?
+**Analogy:** When the main course arrives at your table - the most important part of your order is now visible.
 
-PageSpeed Insights (PSI) combines **real-world data** from Chrome User Experience Report (CrUX) with **lab data** from Lighthouse.
+**Why it matters:**
 
-```mermaid
-flowchart LR
-    A[Enter URL] --> B[PageSpeed Insights]
-    B --> C[Field Data<br/>Real Users]
-    B --> D[Lab Data<br/>Lighthouse]
-    C --> E[Core Web Vitals]
-    D --> F[Opportunities]
-    D --> G[Diagnostics]
-```
+- This is what users perceive as "the page has loaded"
+- Google uses this as a Core Web Vital (affects SEO)
 
-### Understanding PSI Results
+| LCP Score | Rating |
+|-----------|--------|
+| ≤ 2.5 seconds | 🟢 Good |
+| 2.5 - 4 seconds | 🟡 Needs Improvement |
+| > 4 seconds | 🔴 Poor |
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│  📊 FIELD DATA (Last 28 days - Real Users)                 │
-├─────────────────────────────────────────────────────────────┤
-│  FCP: 1.2s 🟢    LCP: 2.1s 🟢    CLS: 0.05 🟢              │
-│  INP: 180ms 🟢   TTFB: 0.6s 🟢                              │
-├─────────────────────────────────────────────────────────────┤
-│  📱 Mobile Score: 78    💻 Desktop Score: 95                │
-└─────────────────────────────────────────────────────────────┘
+**What typically causes LCP:**
 
-┌─────────────────────────────────────────────────────────────┐
-│  ⚡ OPPORTUNITIES (Potential Savings)                       │
-├─────────────────────────────────────────────────────────────┤
-│  Serve images in next-gen formats ........... 1.2s         │
-│  Eliminate render-blocking resources ........ 0.8s         │
-│  Reduce unused JavaScript ................... 0.5s         │
-│  Properly size images ....................... 0.3s         │
-└─────────────────────────────────────────────────────────────┘
-```
-
-### Using PSI Programmatically
-
-```javascript
-// Using PageSpeed Insights API
-const API_KEY = 'YOUR_API_KEY';
-const url = 'https://example.com';
-
-async function runPSI(url) {
-    const apiUrl = `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${encodeURIComponent(url)}&key=${API_KEY}&strategy=mobile`;
-    
-    const response = await fetch(apiUrl);
-    const data = await response.json();
-    
-    // Extract Core Web Vitals
-    const metrics = data.loadingExperience.metrics;
-    console.log('LCP:', metrics.LARGEST_CONTENTFUL_PAINT_MS);
-    console.log('FID:', metrics.FIRST_INPUT_DELAY_MS);
-    console.log('CLS:', metrics.CUMULATIVE_LAYOUT_SHIFT_SCORE);
-    
-    return data;
-}
-```
+- Hero images
+- Large text blocks
+- Video poster images
+- Background images
 
 ---
 
-## 1.5 Browser-Based Assessment Tools
+### Interactivity Metrics - How Responsive the Page Feels
 
-### Chrome DevTools Overview
+#### FID (First Input Delay)
+>
+> **What it means:** How long the browser takes to respond to your FIRST click, tap, or keypress.
 
-```
-Chrome DevTools Panels for Performance:
+**Analogy:** You press a button on a remote control - FID measures how long until the TV actually responds.
 
-┌─────────────────────────────────────────────────────────────┐
-│  Elements │ Console │ Sources │ Network │ Performance │ ... │
-└─────────────────────────────────────────────────────────────┘
-                               ↓           ↓
-                         File loading  CPU profiling
-                         Waterfall     Flamegraph
-                         Timing        Long tasks
-```
+**Good FID:** Less than 100 milliseconds
 
-### Opening DevTools
+**Why delays happen:**
 
-```
-Keyboard Shortcuts:
-├── F12              → Open DevTools
-├── Ctrl+Shift+I     → Open DevTools
-├── Ctrl+Shift+J     → Open Console
-├── Ctrl+Shift+C     → Inspect Element
-└── Ctrl+Shift+P     → Command Palette
-```
+- Browser is busy loading/running JavaScript
+- Main thread is blocked by heavy computations
+- Too many scripts running at once
 
 ---
 
-## 1.6 Inspecting Network Requests
+#### INP (Interaction to Next Paint) ⭐ Core Web Vital (Replaced FID in 2024)
+>
+> **What it means:** Measures responsiveness throughout the ENTIRE page visit, not just the first click.
 
-### Network Tab Essentials
+**Simple explanation:** While FID only measures your first interaction, INP measures ALL your interactions and reports the worst one.
+
+| INP Score | Rating |
+|-----------|--------|
+| ≤ 200 milliseconds | 🟢 Good |
+| 200 - 500 milliseconds | 🟡 Needs Improvement |
+| > 500 milliseconds | 🔴 Poor |
+
+**Why INP replaced FID:**
+
+- More accurate representation of user experience
+- FID only measured first interaction, missing later problems
+- INP captures the complete picture
+
+---
+
+#### TBT (Total Blocking Time)
+>
+> **What it means:** The total time during page load when the browser couldn't respond to user input.
+
+**Analogy:** Imagine a customer service line where you're put on hold. TBT is the total time you spent on hold while the page was loading.
+
+**Technical explanation:**
+
+- Browser has a "main thread" that handles user interactions
+- When JavaScript runs, it "blocks" this thread
+- Any task longer than 50ms is considered "long" and blocks interactions
+- TBT = Sum of all time beyond 50ms for each long task
+
+**Example:**
 
 ```
-Network Waterfall Visualization:
+Task 1: 30ms  → Not long (under 50ms), adds 0ms to TBT
+Task 2: 150ms → Long task! Adds 100ms to TBT (150-50=100)
+Task 3: 75ms  → Long task! Adds 25ms to TBT (75-50=25)
 
-File             │ 0ms   200ms  400ms  600ms  800ms  1000ms
-─────────────────┼──────────────────────────────────────────
-index.html       │ ██░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-styles.css       │    ████████░░░░░░░░░░░░░░░░░░░░░░░░░░░
-bundle.js        │    ██████████████████░░░░░░░░░░░░░░░░░
-hero.webp        │              ████████████░░░░░░░░░░░░░
-font.woff2       │                 ██████████░░░░░░░░░░░░
-analytics.js     │                       ██████░░░░░░░░░░
-
-Legend: ██ = Active download  ░░ = Waiting
+Total TBT = 0 + 100 + 25 = 125ms
 ```
 
-### Key Network Columns
+**Good TBT:** Less than 200 milliseconds
+
+---
+
+### Visual Stability Metrics
+
+#### CLS (Cumulative Layout Shift) ⭐ Core Web Vital
+>
+> **What it means:** Measures how much page content jumps around unexpectedly while loading.
+
+**Analogy:** You're about to click a button, but suddenly an ad loads above it, pushing the button down. You accidentally click the ad instead. That's a layout shift!
+
+**Why it's frustrating:**
+
+- You click the wrong thing
+- Hard to read jumping text
+- Makes the site feel broken
+
+| CLS Score | Rating |
+|-----------|--------|
+| ≤ 0.1 | 🟢 Good |
+| 0.1 - 0.25 | 🟡 Needs Improvement |
+| > 0.25 | 🔴 Poor |
+
+**Common causes of layout shifts:**
+
+- Images without width/height specified
+- Ads that load later
+- Fonts that swap after loading
+- Dynamic content inserted above existing content
+
+**How to prevent CLS:**
+
+- Always set width and height on images
+- Reserve space for ads
+- Use font-display: swap with fallback fonts
+
+---
+
+### Custom/Additional Metrics
+
+#### TTI (Time to Interactive)
+>
+> **What it means:** When the page is fully loaded AND can reliably respond to user input.
+
+**Analogy:** The restaurant is open, staff is ready, and they can take your order immediately without delay.
+
+**The difference from other metrics:**
+
+- FCP = Something is visible
+- LCP = Main content is visible
+- TTI = Everything is ready and responsive
+
+---
+
+#### Speed Index
+>
+> **What it means:** How quickly the visible parts of the page are displayed.
+
+**Technical definition:** Average time at which visible parts of the page are displayed.
+
+**Analogy:** If a page loads in pieces over 5 seconds, Speed Index considers HOW those pieces load. A page showing 80% content at 1 second has a better Speed Index than one showing 20% at 1 second.
+
+**Good Speed Index:** Less than 3.4 seconds
+
+---
+
+## 1.3 The Three Pillars of Web Performance
+
+Web performance can be divided into three main categories:
+
+### 1. Loading Performance
+
+**Definition:** How fast content downloads and appears
+
+**Key Questions:**
+
+- How big are your files?
+- How fast is your server?
+- How far is the user from your server?
+
+**Metrics:** TTFB, FCP, LCP, Speed Index
+
+---
+
+### 2. Rendering Performance
+
+**Definition:** How smoothly the page displays and animates
+
+**Key Questions:**
+
+- Does scrolling feel smooth?
+- Do animations run at 60fps?
+- Does the page feel "janky" or smooth?
+
+**Target:** 60 frames per second (16.67ms per frame)
+
+---
+
+### 3. Interactivity
+
+**Definition:** How quickly the page responds to user actions
+
+**Key Questions:**
+
+- Does clicking feel instant?
+- Is there delay when typing?
+- Do buttons respond immediately?
+
+**Metrics:** FID, INP, TBT, TTI
+
+---
+
+## 1.4 Understanding How Browsers Load Pages
+
+To optimize performance, you need to understand what happens when someone visits your website:
+
+### The Browser Loading Process
+
+```
+User types URL and presses Enter
+           ↓
+1. DNS Lookup
+   Browser asks: "What's the IP address for this domain?"
+   (Like looking up a phone number in a directory)
+           ↓
+2. TCP Connection
+   Browser connects to the server
+   (Like dialing the phone number)
+           ↓
+3. TLS/SSL Handshake (for HTTPS)
+   Browser and server establish secure connection
+   (Like verifying you're talking to the right person)
+           ↓
+4. HTTP Request
+   Browser asks: "Send me the HTML for this page"
+           ↓
+5. Server Response (TTFB measured here)
+   Server sends back HTML
+           ↓
+6. HTML Parsing
+   Browser reads HTML and builds DOM
+   (Document Object Model - the page structure)
+           ↓
+7. Discover Resources
+   Browser finds CSS, JavaScript, images in HTML
+           ↓
+8. Download Resources
+   Browser downloads CSS, JS, images in parallel
+           ↓
+9. Execute JavaScript
+   Browser runs your scripts
+           ↓
+10. Render Page
+    Browser paints pixels on screen
+    (FCP happens here)
+           ↓
+11. Page Interactive
+    User can interact with the page
+    (TTI measured here)
+```
+
+### Critical Rendering Path
+
+**Definition:** The sequence of steps the browser takes to convert HTML, CSS, and JavaScript into pixels on the screen.
+
+**Why it matters:** The faster this path completes, the faster users see your content.
+
+**The steps:**
+
+1. **Build DOM** (from HTML)
+2. **Build CSSOM** (from CSS) - BLOCKS rendering!
+3. **Build Render Tree** (combine DOM + CSSOM)
+4. **Layout** (calculate positions)
+5. **Paint** (draw pixels)
+
+> **Key insight:** CSS blocks rendering. The browser won't show anything until CSS is downloaded and processed. This is why "critical CSS" matters (covered in Unit II).
+
+---
+
+## 1.5 Assessment Tools
+
+### Google PageSpeed Insights
+
+**What it is:** A free tool from Google that analyzes your webpage and gives performance scores.
+
+**URL:** <https://pagespeed.web.dev>
+
+**What it provides:**
+
+- Performance score (0-100)
+- Core Web Vitals readings
+- Specific recommendations for improvement
+- Both mobile and desktop analysis
+
+**Two types of data:**
+
+1. **Field Data** (Real-world) - Actual data from Chrome users visiting your site
+2. **Lab Data** (Simulated) - Tests run by Google's servers right now
+
+---
+
+### Chrome DevTools
+
+**What it is:** Built-in developer tools in Chrome browser.
+
+**How to open:** Press F12 or right-click → "Inspect"
+
+**Key panels for performance:**
+
+#### Network Panel
+
+Shows all files downloaded when loading a page:
+
+- File sizes
+- Download times
+- Request order
+- Blocked time
+
+#### Performance Panel
+
+Records detailed timeline of page loading:
+
+- CPU usage
+- Screenshot timeline
+- Main thread activity
+- Long tasks
+
+#### Lighthouse Panel
+
+Runs automated audits:
+
+- Performance
+- Accessibility
+- Best Practices
+- SEO
+
+#### Coverage Panel
+
+Shows unused CSS and JavaScript:
+
+- Red = unused code
+- Green = used code
+- Helps identify code to remove
+
+---
+
+### Network Request Inspection
+
+When analyzing network requests, pay attention to:
 
 | Column | What to Look For |
 |--------|------------------|
-| **Name** | Resource file names |
-| **Status** | 200 (OK), 304 (Cached), 404 (Error) |
-| **Type** | document, script, stylesheet, image |
-| **Initiator** | What requested this resource |
-| **Size** | Transfer size (look for > 100KB) |
-| **Time** | Total load time |
-| **Priority** | Highest, High, Medium, Low |
-
-### Filtering Network Requests
-
-```javascript
-// Network tab filters:
-// Type filters: [All] [Fetch/XHR] [JS] [CSS] [Img] [Media] [Font]
-
-// Custom filters in Filter box:
-// larger-than:100KB    → Files over 100KB
-// -domain:cdn.com      → Exclude CDN requests
-// status-code:404      → Find broken resources
-// mime-type:font       → Only font files
-// is:from-cache        → Cached resources
-```
-
-### Analyzing a Request
-
-```
-Request Details Panel:
-
-┌─ Headers ─────────────────────────────────────────────────┐
-│ General:                                                  │
-│   Request URL: https://example.com/bundle.js              │
-│   Request Method: GET                                     │
-│   Status Code: 200 OK                                     │
-│                                                           │
-│ Response Headers:                                         │
-│   content-encoding: br        ← Brotli compressed!        │
-│   cache-control: max-age=31536000  ← 1 year cache         │
-│   content-type: application/javascript                    │
-│                                                           │
-├─ Timing ──────────────────────────────────────────────────┤
-│   Queueing:        0.5ms                                  │
-│   DNS Lookup:      15ms    ← Domain resolution            │
-│   Initial Connection: 25ms ← TCP handshake                │
-│   SSL:             30ms    ← HTTPS negotiation            │
-│   Request sent:    0.2ms                                  │
-│   Waiting (TTFB):  120ms   ← Server processing            │
-│   Content Download: 45ms   ← File transfer                │
-│   ─────────────────────────                               │
-│   Total:           235.7ms                                │
-└───────────────────────────────────────────────────────────┘
-```
+| **Status** | 200=OK, 404=Not Found, 500=Server Error |
+| **Size** | Files over 100KB need attention |
+| **Time** | Slow files that delay page load |
+| **Initiator** | What triggered this download |
+| **Waterfall** | Visual timeline of download |
 
 ---
 
-## 1.7 Rendering Performance Auditing
+### Understanding the Waterfall Chart
 
-### Performance Tab Recording
-
-```
-Steps to Record:
-1. Open DevTools → Performance tab
-2. Click ⚙️ → Enable "Screenshots" and "Web Vitals"
-3. Click 🔴 Record (or Ctrl+E)
-4. Refresh the page (Ctrl+R)
-5. Wait for page to fully load
-6. Click Stop
-```
-
-### Understanding the Flamegraph
+The waterfall shows how resources load over time:
 
 ```
-Performance Recording Layout:
+File             Time →
+─────────────────────────────────────────
+index.html       ▓▓░░░░░░░░░░░░░░░░░░░░░░
+styles.css          ▓▓▓▓▓▓░░░░░░░░░░░░░░░
+app.js                    ▓▓▓▓▓▓▓▓▓░░░░░░
+hero.jpg                        ▓▓▓▓▓▓▓▓▓
+font.woff2                           ▓▓▓▓
 
-┌─ Frames ─────────────────────────────────────────────────┐
-│ ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░  │
-├─ Web Vitals ─────────────────────────────────────────────┤
-│     ▲FCP      ▲LCP                     ▲CLS              │
-├─ Main Thread ────────────────────────────────────────────┤
-│ ████████ Parse HTML                                      │
-│     ████ Evaluate Script (bundle.js)                     │
-│         ██████████████████ [Long Task - 350ms!]          │
-│                            ██ Recalculate Style          │
-│                              ███ Layout                  │
-│                                  █ Paint                 │
-├─ Network ────────────────────────────────────────────────┤
-│ ██ html  ████ css  ████████████ js  ██████ images        │
-└──────────────────────────────────────────────────────────┘
+Legend: ▓ = downloading, ░ = waiting
 ```
 
-### Identifying Performance Issues
+**Reading the waterfall:**
 
-```
-Red Flags to Look For:
-
-1. Long Tasks (> 50ms)
-   └── Look for red corners on task blocks
-   └── These block user interaction
-
-2. Layout Thrashing
-   └── Purple "Recalculate Style" repeatedly
-   └── Caused by reading then writing DOM
-
-3. Forced Reflow
-   └── Reading layout after writing
-   └── Example: element.offsetHeight after style change
-
-4. Paint Storms
-   └── Excessive green "Paint" blocks
-   └── Often from animations or scroll handlers
-```
+- Vertical lines show when files start downloading
+- Longer bars = bigger files or slower downloads
+- Gaps = waiting time (potential optimization opportunity)
 
 ---
 
-## 1.8 Benchmarking JavaScript in Chrome
+## 1.6 Network Throttling and Device Simulation
 
-### Console Timing Methods
+### Why Simulate Slower Conditions?
 
-```javascript
-// Method 1: console.time / console.timeEnd
-console.time('arrayOperation');
-const arr = Array(1000000).fill(0).map((_, i) => i * 2);
-console.timeEnd('arrayOperation');
-// Output: arrayOperation: 45.123ms
+**The problem:** Developers usually have fast computers and fast internet. But users don't!
 
-// Method 2: performance.now()
-const start = performance.now();
-heavyOperation();
-const end = performance.now();
-console.log(`Operation took ${end - start}ms`);
+**Reality check:**
 
-// Method 3: performance.mark and measure
-performance.mark('start-process');
-processData();
-performance.mark('end-process');
-performance.measure('data-processing', 'start-process', 'end-process');
+- Average mobile phone is 4-6x slower than developer's laptop
+- Many users have 3G or slow 4G connections
+- Not everyone lives near data centers
 
-const measures = performance.getEntriesByName('data-processing');
-console.log(measures[0].duration);
-```
+### Chrome DevTools Throttling
 
-### Profiling JavaScript
+**How to enable:**
 
-```
-Performance Tab → Record → Analyze Call Tree:
+1. Open DevTools (F12)
+2. Go to Network tab
+3. Find "No throttling" dropdown
+4. Select a preset or create custom
 
-┌─ Call Tree ──────────────────────────────────────────────┐
-│ Total Time │ Self Time │ Function                        │
-├────────────┼───────────┼─────────────────────────────────┤
-│   450ms    │   120ms   │ processData                     │
-│   200ms    │   200ms   │   ├── parseJSON                 │
-│   100ms    │    50ms   │   ├── transformData             │
-│    50ms    │    50ms   │   │   └── mapItems              │
-│    30ms    │    30ms   │   └── sortResults               │
-└────────────┴───────────┴─────────────────────────────────┘
+**Presets available:**
 
-Tip: Sort by "Self Time" to find the actual slow functions
-```
-
----
-
-## 1.9 Simulating and Monitoring Devices
-
-### Device Simulation in DevTools
-
-```
-Enable Device Mode:
-1. Open DevTools
-2. Click 📱 Toggle Device Toolbar (Ctrl+Shift+M)
-3. Select device from dropdown or set custom dimensions
-
-Device Presets:
-├── iPhone SE (375 x 667)
-├── iPhone 12 Pro (390 x 844)
-├── iPad Air (820 x 1180)
-├── Samsung Galaxy S20 (360 x 800)
-└── Custom dimensions...
-```
-
-### Network Throttling Profiles
-
-```
-Built-in Profiles:
-├── No throttling     → Full speed
-├── Fast 3G           → 1.5 Mbps, 40ms RTT
-├── Slow 3G           → 750 Kbps, 100ms RTT
-└── Offline           → No network
-
-Creating Custom Profile (DevTools → Network → ⚙️):
-┌─────────────────────────────────────────────────────────┐
-│ Profile name: [Emerging Markets 2G]                     │
-│                                                         │
-│ Download: [280] Kbps  │ Upload: [256] Kbps              │
-│ Latency: [800] ms                                       │
-└─────────────────────────────────────────────────────────┘
-```
+| Profile | Speed | Latency | Use Case |
+|---------|-------|---------|----------|
+| Fast 3G | 1.5 Mbps | 40ms | Average mobile |
+| Slow 3G | 750 Kbps | 100ms | Poor connection |
+| Offline | 0 | ∞ | Test offline support |
 
 ### CPU Throttling
 
-```
-Performance Tab → ⚙️ → CPU:
-├── No throttling
-├── 4x slowdown    → Simulates mid-range mobile
-└── 6x slowdown    → Simulates low-end mobile
+**How to enable:**
 
-Why CPU throttle?
-└── Your dev machine is 4-10x faster than average user's phone
-└── Test interactions and animations realistically
-```
+1. Open DevTools → Performance tab
+2. Click ⚙️ Settings
+3. Select 4x or 6x slowdown
 
----
+**Why throttle CPU?**
 
-## 1.10 Creating Custom Network Throttling Profiles
-
-### Common Network Conditions Worldwide
-
-| Region | Typical Speed | Latency | Profile Settings |
-|--------|--------------|---------|-----------------|
-| Urban 4G | 12 Mbps | 50ms | Fast connection |
-| Rural 4G | 4 Mbps | 100ms | Moderate |
-| 3G | 1.5 Mbps | 300ms | Slow 3G preset |
-| Emerging 2G | 280 Kbps | 800ms | Custom profile |
-| Satellite | 1 Mbps | 600ms | Custom profile |
-
-### Setting Up Realistic Test Conditions
-
-```javascript
-// Test script to verify mobile experience
-async function testMobilePerformance() {
-    // Enable throttling via Chrome DevTools Protocol (CDP)
-    const client = await page.target().createCDPSession();
-    
-    // Simulate Slow 3G
-    await client.send('Network.emulateNetworkConditions', {
-        offline: false,
-        downloadThroughput: 750 * 1024 / 8,  // 750 Kbps
-        uploadThroughput: 250 * 1024 / 8,    // 250 Kbps
-        latency: 100                          // 100ms RTT
-    });
-    
-    // Simulate CPU throttling
-    await client.send('Emulation.setCPUThrottlingRate', {
-        rate: 4  // 4x slowdown
-    });
-    
-    // Now navigate and measure
-    const start = performance.now();
-    await page.goto('https://example.com');
-    console.log(`Load time: ${performance.now() - start}ms`);
-}
-```
+- Your dev machine has fast processor
+- Average smartphone is much slower
+- Animations that work fine for you may be janky for users
 
 ---
 
-## 1.11 Unit I Summary
+## 1.7 Performance Budgets
 
-### Key Concepts
+### What is a Performance Budget?
 
-```
-Web Performance Fundamentals:
+**Definition:** Pre-defined limits for metrics that you don't want to exceed.
 
-Assessment Flow:
-├── 1. Baseline → Measure current state
-├── 2. Audit → Identify issues
-├── 3. Analyze → Prioritize fixes
-├── 4. Optimize → Implement changes
-└── 5. Monitor → Track improvements
+**Analogy:** Like a financial budget but for performance. "We will not let our page exceed 500KB or take more than 3 seconds to load."
 
-Essential Tools:
-├── Google PageSpeed Insights → Real + Lab data
-├── Chrome DevTools Network → Request analysis
-├── Chrome DevTools Performance → CPU profiling
-├── Lighthouse → Comprehensive audits
-└── WebPageTest → Detailed waterfalls
+### Example Performance Budget
 
-Key Metrics:
-├── LCP ≤ 2.5s (Loading)
-├── INP ≤ 200ms (Interactivity)
-├── CLS ≤ 0.1 (Stability)
-└── TTFB ≤ 800ms (Server)
-```
+| Metric | Budget |
+|--------|--------|
+| Page Weight | < 500 KB |
+| LCP | < 2.5 seconds |
+| TBT | < 200 ms |
+| JavaScript | < 200 KB |
+| Images | < 300 KB |
+| Requests | < 50 |
+
+### Enforcing Budgets
+
+Performance budgets can be integrated into your build process to warn or fail when exceeded. This prevents performance regressions over time.
+
+---
+
+## 1.8 Unit I Summary
+
+### Key Concepts Learned
+
+**Web Performance** = Speed + Efficiency + Responsiveness
+
+**Core Web Vitals (Google's top 3 metrics):**
+
+| Metric | Measures | Good Score |
+|--------|----------|------------|
+| LCP | Loading | ≤ 2.5s |
+| INP | Interactivity | ≤ 200ms |
+| CLS | Visual Stability | ≤ 0.1 |
+
+**Other Important Metrics:**
+
+- **TTFB** - Server response time
+- **FCP** - First content visible
+- **TBT** - Time browser was blocked
+- **TTI** - Page fully interactive
+- **Speed Index** - Visual progress speed
+
+**Assessment Tools:**
+
+- PageSpeed Insights - Free Google tool
+- Chrome DevTools - Built-in browser tools
+- Lighthouse - Automated audits
+- WebPageTest - Detailed waterfall analysis
 
 ---
 
 # Unit II: CSS Optimization & Critical CSS
 
-## 2.1 Introduction to CSS Optimization
+## 2.1 Understanding CSS Performance
 
-### Why CSS Performance Matters
+### How CSS Affects Page Loading
 
-CSS is **render-blocking** by default. The browser won't paint anything until all CSS is downloaded and parsed.
+**Key fact:** CSS is "render-blocking" by default.
 
-```mermaid
-flowchart LR
-    A[HTML Downloaded] --> B[CSS Downloaded]
-    B --> C[CSSOM Built]
-    C --> D[Render Tree]
-    D --> E[First Paint]
-    
-    B -.->|Blocks| E
+> **What does render-blocking mean?**
+> The browser will NOT show anything on screen until ALL your CSS is downloaded and processed. Even if your HTML is ready, users see a blank page while waiting for CSS.
+
+**Why is CSS render-blocking?**
+The browser needs to know styles before painting. Otherwise:
+
+- Text might appear then change font
+- Layouts would jump around
+- Colors would switch suddenly
+
+### The Problem with Large CSS Files
+
+```
+Scenario: 500KB CSS file on slow 3G connection
+
+Download time: 500KB ÷ 750Kbps ≈ 5.3 seconds
+Result: User sees NOTHING for 5+ seconds!
 ```
 
-### Common CSS Performance Issues
-
-```
-CSS Performance Problems:
-
-1. Large CSS Files
-   └── All CSS downloaded before first paint
-   └── Solution: Split and load critical CSS first
-
-2. Unused CSS
-   └── Average site has 35-40% unused CSS
-   └── Solution: Remove or tree-shake unused styles
-
-3. Complex Selectors
-   └── Browser matches selectors right-to-left
-   └── Solution: Use simple, shallow selectors
-
-4. Render-Blocking
-   └── CSS blocks rendering by default
-   └── Solution: Inline critical CSS, defer the rest
-```
+This is why CSS optimization is crucial.
 
 ---
 
-## 2.2 Mobile-First is User-First
+## 2.2 Mobile-First CSS
 
-### Mobile-First CSS Approach
+### What is Mobile-First Design?
+
+**Definition:** Writing your base CSS for mobile screens, then adding styles for larger screens using media queries.
+
+**The old way (Desktop-First):**
 
 ```css
-/* ❌ Desktop-First (Bad for mobile) */
-.container {
-    width: 1200px;
-    padding: 40px;
-}
+/* Start with desktop styles */
+.container { width: 1200px; }
 
+/* Override for mobile */
 @media (max-width: 768px) {
-    .container {
-        width: 100%;
-        padding: 20px;
-    }
+  .container { width: 100%; }
 }
+```
 
-/* ✅ Mobile-First (Better performance) */
-.container {
-    width: 100%;
-    padding: 20px;
-}
+**The better way (Mobile-First):**
 
+```css
+/* Start with mobile styles */
+.container { width: 100%; }
+
+/* Enhance for desktop */
 @media (min-width: 768px) {
-    .container {
-        width: 1200px;
-        padding: 40px;
-    }
+  .container { width: 1200px; }
 }
 ```
 
-### Why Mobile-First is Faster
+### Why Mobile-First is Better for Performance
 
-```
-Mobile-First Benefits:
+1. **Mobile devices download less CSS initially**
+   - Base styles are simple and small
+   - Complex desktop styles only download if needed
 
-1. Smaller Initial CSS
-   └── Mobile styles are simpler, load faster
-   
-2. Progressive Enhancement
-   └── Add complexity only when needed
-   
-3. Core Styles First
-   └── Essential styles load before enhancements
-   
-4. Better Mobile Performance
-   └── Mobile devices get only what they need
-```
+2. **Progressive Enhancement**
+   - Start with essentials
+   - Add features for capable devices
 
-### Mobile-First Media Query Strategy
-
-```css
-/* Base styles - Mobile (< 576px) */
-.card {
-    padding: 1rem;
-    font-size: 14px;
-}
-
-/* Small tablets (≥ 576px) */
-@media (min-width: 576px) {
-    .card {
-        padding: 1.5rem;
-        font-size: 15px;
-    }
-}
-
-/* Tablets (≥ 768px) */
-@media (min-width: 768px) {
-    .card {
-        padding: 2rem;
-        font-size: 16px;
-    }
-}
-
-/* Desktops (≥ 992px) */
-@media (min-width: 992px) {
-    .card {
-        max-width: 800px;
-        margin: 0 auto;
-    }
-}
-
-/* Large screens (≥ 1200px) */
-@media (min-width: 1200px) {
-    .card {
-        max-width: 1000px;
-    }
-}
-```
+3. **Matches Google's approach**
+   - Google uses "mobile-first indexing"
+   - Your mobile site is what Google evaluates
 
 ---
 
-## 2.3 Performance-Tuning Your CSS
+## 2.3 CSS Performance Best Practices
 
-### Selector Performance
+### Keep Selectors Simple
 
-```css
-/* ❌ BAD: Overly complex selectors */
-body div.container ul.nav li a.active span {
-    color: blue;
-}
-
-header nav ul li:nth-child(2n+1) > a[href^="https"] {
-    text-decoration: none;
-}
-
-/* ✅ GOOD: Simple, direct selectors */
-.nav-link-active {
-    color: blue;
-}
-
-.nav-external-link {
-    text-decoration: none;
-}
-```
-
-### Selector Specificity Guide
-
-```
-Specificity Calculation:
-├── Inline styles       → 1,0,0,0
-├── IDs (#id)          → 0,1,0,0
-├── Classes, attributes → 0,0,1,0
-└── Elements           → 0,0,0,1
-
-Examples:
-├── div                 → 0,0,0,1
-├── .button            → 0,0,1,0
-├── #header .nav       → 0,1,1,0
-├── div.card:hover     → 0,0,2,1
-└── style="..."        → 1,0,0,0
-
-Keep specificity LOW for maintainability and performance!
-```
-
-### Reducing CSS File Size
+**The browser reads selectors RIGHT to LEFT:**
 
 ```css
-/* 1. Remove whitespace (minification) */
-/* Before: 156 bytes */
-.button {
-    background-color: #007bff;
-    padding: 10px 20px;
-    border-radius: 4px;
-}
+/* Browser reads: find all "a" → filter to "li" → filter to "ul" → filter to ".nav" */
+.nav ul li a { }
 
-/* After: 75 bytes (52% smaller) */
-.button{background-color:#007bff;padding:10px 20px;border-radius:4px}
-
-/* 2. Combine similar rules */
-/* Before */
-.btn-primary { background: blue; }
-.btn-secondary { background: gray; }
-
-/* After */
-.btn-primary, .btn-secondary { /* shared styles */ }
-.btn-primary { background: blue; }
-.btn-secondary { background: gray; }
-
-/* 3. Use shorthand properties */
-/* Before */
-.box {
-    margin-top: 10px;
-    margin-right: 20px;
-    margin-bottom: 10px;
-    margin-left: 20px;
-}
-
-/* After */
-.box {
-    margin: 10px 20px;
-}
+/* Much faster - direct class lookup */
+.nav-link { }
 ```
 
-### Finding Unused CSS
+### Avoid Expensive Properties
 
-```javascript
-// Using Chrome DevTools Coverage
-// 1. Press Ctrl+Shift+P
-// 2. Type "Coverage" and select "Show Coverage"
-// 3. Click 🔴 to record
-// 4. Refresh page
-// 5. See red (unused) vs green (used) per file
+Some CSS properties are more expensive (slow) to render:
 
-// Programmatic approach using PurgeCSS
-// purgecss.config.js
-module.exports = {
-    content: ['./src/**/*.html', './src/**/*.js'],
-    css: ['./src/styles.css'],
-    output: './dist/styles.css'
-};
-```
+**Expensive (use carefully):**
+
+- `box-shadow`
+- `filter`
+- `opacity` (when animating)
+- `position: fixed`
+
+**Fast:**
+
+- `transform`
+- `color`
+- `background-color`
+
+### Remove Unused CSS
+
+**Shocking fact:** The average website has 35-50% unused CSS.
+
+**How to find unused CSS:**
+
+1. Chrome DevTools → Coverage panel
+2. Press record (🔴)
+3. Load your page
+4. Red bars = unused CSS
 
 ---
 
-## 2.4 Working with CSS Transitions
-
-### Performant CSS Transitions
-
-```css
-/* Properties that are cheap to animate (GPU accelerated): */
-.element {
-    /* ✅ GOOD - Uses compositor thread */
-    transform: translateX(100px);
-    opacity: 0.5;
-}
-
-/* Properties that are expensive to animate: */
-.element {
-    /* ❌ BAD - Triggers layout/paint */
-    left: 100px;      /* Triggers layout */
-    width: 200px;     /* Triggers layout */
-    background: red;  /* Triggers paint */
-}
-```
-
-### Transition Performance Comparison
-
-| Property | Layout | Paint | Composite | Performance |
-|----------|--------|-------|-----------|-------------|
-| `transform` | ❌ | ❌ | ✅ | 🟢 Excellent |
-| `opacity` | ❌ | ❌ | ✅ | 🟢 Excellent |
-| `filter` | ❌ | ✅ | ✅ | 🟡 Good |
-| `background-color` | ❌ | ✅ | ✅ | 🟡 Good |
-| `width/height` | ✅ | ✅ | ✅ | 🔴 Poor |
-| `top/left` | ✅ | ✅ | ✅ | 🔴 Poor |
-
-### Optimized Transition Examples
-
-```css
-/* ❌ BAD: Animating left causes layout thrashing */
-.slide-in-bad {
-    position: absolute;
-    left: -100%;
-    transition: left 0.3s ease;
-}
-.slide-in-bad.active {
-    left: 0;
-}
-
-/* ✅ GOOD: Using transform for smooth animation */
-.slide-in-good {
-    transform: translateX(-100%);
-    transition: transform 0.3s ease;
-    will-change: transform; /* Hint for browser optimization */
-}
-.slide-in-good.active {
-    transform: translateX(0);
-}
-
-/* ✅ Fade animation */
-.fade {
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
-.fade.visible {
-    opacity: 1;
-}
-
-/* ✅ Scale animation */
-.zoom {
-    transform: scale(0.8);
-    transition: transform 0.2s ease;
-}
-.zoom:hover {
-    transform: scale(1);
-}
-```
-
-### The `will-change` Property
-
-```css
-/* Use sparingly - creates new compositor layer */
-.animated-element {
-    will-change: transform, opacity;
-}
-
-/* Remove after animation */
-.animated-element.animation-done {
-    will-change: auto;
-}
-
-/* 
-WARNING: Don't overuse will-change!
-- Creates GPU memory overhead
-- Only use for complex animations
-- Remove when animation completes
-*/
-```
-
----
-
-## 2.5 Introduction to Critical CSS
+## 2.4 Critical CSS
 
 ### What is Critical CSS?
 
-Critical CSS is the **minimum CSS required to render above-the-fold content**.
+**Definition:** The minimum CSS required to render the "above-the-fold" content (what users see before scrolling).
 
-```mermaid
-flowchart TD
-    A[Full CSS File<br/>100KB] --> B[Extract Critical CSS<br/>10KB]
-    B --> C[Inline in HTML]
-    A --> D[Load Async<br/>Rest of CSS]
-    
-    C --> E[Fast First Paint!]
-    D --> F[Complete Styling]
-```
+**Above the fold** = The portion of the webpage visible without scrolling.
 
-### Above-the-Fold Content
+### Why Critical CSS Matters
+
+**Without Critical CSS:**
 
 ```
-┌─────────────────────────────────────┐
-│           Browser Window            │
-├─────────────────────────────────────┤
-│  ┌─────────────────────────────┐   │
-│  │         Header/Nav           │   │  ← ABOVE THE FOLD
-│  ├─────────────────────────────┤   │     (Critical CSS needed)
-│  │                             │   │
-│  │        Hero Section         │   │
-│  │                             │   │
-│  └─────────────────────────────┘   │
-├ ─ ─ ─ ─ ─ FOLD LINE ─ ─ ─ ─ ─ ─ ─ ─┤
-│  ┌─────────────────────────────┐   │  ← BELOW THE FOLD
-│  │      Content Cards          │   │     (Can wait)
-│  └─────────────────────────────┘   │
-│  ┌─────────────────────────────┐   │
-│  │         Footer              │   │
-│  └─────────────────────────────┘   │
-└─────────────────────────────────────┘
+1. Browser downloads HTML
+2. Browser discovers CSS link
+3. Browser downloads entire CSS file (could be 500KB)
+4. Browser processes CSS
+5. FINALLY shows content to user
 ```
 
----
+**With Critical CSS:**
 
-## 2.6 Implementing Critical CSS
+```
+1. Browser downloads HTML (contains inline critical CSS)
+2. Browser immediately shows above-the-fold content!
+3. Rest of CSS loads in background
+4. Complete styling applied when ready
+```
 
-### Manual Critical CSS Extraction
+### How to Implement Critical CSS
+
+**Step 1: Identify above-the-fold content**
+
+- Usually: header, navigation, hero section
+- First ~600-800 pixels of content
+
+**Step 2: Extract styles for that content**
+
+- Only styles needed for visible elements
+- Usually 10-20KB instead of 100KB+
+
+**Step 3: Inline critical CSS in HTML**
 
 ```html
-<!DOCTYPE html>
-<html>
 <head>
-    <!-- Critical CSS inlined -->
-    <style>
-        /* Only styles needed for above-the-fold */
-        body {
-            margin: 0;
-            font-family: system-ui, sans-serif;
-        }
-        .header {
-            background: #1a1a2e;
-            color: white;
-            padding: 1rem;
-        }
-        .hero {
-            padding: 4rem 2rem;
-            background: linear-gradient(#1a1a2e, #16213e);
-            color: white;
-        }
-        .hero h1 {
-            font-size: 2.5rem;
-            margin: 0;
-        }
-    </style>
-    
-    <!-- Non-critical CSS loaded asynchronously -->
-    <link rel="preload" href="styles.css" as="style" 
-          onload="this.onload=null;this.rel='stylesheet'">
-    <noscript><link rel="stylesheet" href="styles.css"></noscript>
+  <style>
+    /* Critical CSS here - loads immediately */
+    .header { background: blue; }
+    .hero { padding: 50px; }
+  </style>
+  
+  <!-- Rest of CSS loads asynchronously -->
+  <link rel="preload" href="styles.css" as="style" 
+        onload="this.rel='stylesheet'">
 </head>
-<body>
-    <header class="header">Navigation</header>
-    <section class="hero">
-        <h1>Welcome</h1>
-    </section>
-    <!-- Below fold content -->
-</body>
-</html>
-```
-
-### Automated Critical CSS with npm Tools
-
-```bash
-# Install critical CSS generator
-npm install critical --save-dev
-```
-
-```javascript
-// critical.config.js
-const critical = require('critical');
-
-critical.generate({
-    // Source HTML file
-    src: 'index.html',
-    
-    // Output file
-    target: 'index-critical.html',
-    
-    // Viewport dimensions
-    width: 1300,
-    height: 900,
-    
-    // Inline the critical CSS
-    inline: true,
-    
-    // Extract critical CSS from these stylesheets
-    css: ['styles.css'],
-    
-    // Minify CSS
-    minify: true
-});
-```
-
-### Loading Non-Critical CSS
-
-```html
-<!-- Method 1: Media query swap -->
-<link rel="stylesheet" href="non-critical.css" 
-      media="print" onload="this.media='all'">
-
-<!-- Method 2: Preload with rel swap -->
-<link rel="preload" href="non-critical.css" as="style"
-      onload="this.onload=null;this.rel='stylesheet'">
-<noscript>
-    <link rel="stylesheet" href="non-critical.css">
-</noscript>
-
-<!-- Method 3: JavaScript injection -->
-<script>
-    // Load CSS after page load
-    window.addEventListener('load', function() {
-        const link = document.createElement('link');
-        link.rel = 'stylesheet';
-        link.href = 'non-critical.css';
-        document.head.appendChild(link);
-    });
-</script>
 ```
 
 ---
 
-## 2.7 Weighing the Benefits
+## 2.5 CSS Transitions and Animations
 
-### Critical CSS Trade-offs
+### Performance-Friendly Animations
 
-```
-✅ BENEFITS:
-├── Faster First Contentful Paint (FCP)
-├── Better perceived performance
-├── Improved Core Web Vitals
-├── Higher Lighthouse scores
-└── Better SEO rankings
+**Two properties are "free" to animate:**
 
-❌ CHALLENGES:
-├── Added build complexity
-├── Duplicate CSS (inline + external)
-├── Maintenance overhead
-├── Cache inefficiency (inline CSS not cacheable)
-└── Calculation complexity for dynamic pages
-```
+1. `transform` (rotate, scale, translate)
+2. `opacity` (fade in/out)
 
-### When to Use Critical CSS
+**Why are they free?**
+These properties use the **GPU** (graphics card) instead of CPU. The browser creates a separate "layer" that can animate without affecting other content.
 
-```
-Use Critical CSS When:
-├── ✅ LCP is poor (> 2.5s)
-├── ✅ Large CSS bundles (> 100KB)
-├── ✅ Render-blocking CSS issues in audits
-├── ✅ Marketing/landing pages
-└── ✅ First-time visitor experience is crucial
+### What NOT to Animate
 
-Skip Critical CSS When:
-├── ❌ CSS is already small (< 20KB)
-├── ❌ SPA with minimal initial CSS
-├── ❌ Fully cached returning visitors
-└── ❌ Build complexity is too costly
-```
+**Expensive properties that cause "reflow":**
 
----
+- `width` / `height`
+- `top` / `left` / `right` / `bottom`
+- `margin` / `padding`
+- `font-size`
 
-## 2.8 Making Maintainability Easier
+**Example: Slide-in animation**
 
-### Automating Critical CSS in Build Pipeline
+```css
+/* ❌ SLOW - animates 'left' (causes reflow) */
+.slide-in {
+  position: absolute;
+  left: -100%;
+  transition: left 0.3s;
+}
+.slide-in.active {
+  left: 0;
+}
 
-```javascript
-// gulpfile.js
-const gulp = require('gulp');
-const critical = require('critical').stream;
-
-gulp.task('critical', function() {
-    return gulp.src('dist/*.html')
-        .pipe(critical({
-            base: 'dist/',
-            inline: true,
-            width: 1300,
-            height: 900,
-            css: ['dist/styles.css']
-        }))
-        .pipe(gulp.dest('dist'));
-});
-```
-
-```javascript
-// webpack.config.js with HtmlCriticalWebpackPlugin
-const HtmlCriticalWebpackPlugin = require('html-critical-webpack-plugin');
-
-module.exports = {
-    plugins: [
-        new HtmlCriticalWebpackPlugin({
-            base: path.resolve(__dirname, 'dist'),
-            src: 'index.html',
-            dest: 'index.html',
-            inline: true,
-            minify: true,
-            width: 1300,
-            height: 900
-        })
-    ]
-};
+/* ✅ FAST - animates 'transform' (GPU accelerated) */
+.slide-in {
+  transform: translateX(-100%);
+  transition: transform 0.3s;
+}
+.slide-in.active {
+  transform: translateX(0);
+}
 ```
 
 ---
 
-## 2.9 Considerations for Multi-Page Websites
+## 2.6 Unit II Summary
 
-### Different Pages, Different Critical CSS
+**CSS is render-blocking:**
 
-```
-Multi-Page Strategy:
+- Browser waits for ALL CSS before painting
+- This is why CSS optimization matters
 
-/                    → home-critical.css
-/products            → products-critical.css
-/checkout            → checkout-critical.css
-/blog/*              → blog-critical.css (reusable)
+**Mobile-First approach:**
 
-Approaches:
-1. Generate per-page critical CSS
-2. Use template-based critical CSS
-3. Combine common critical styles
-```
+- Write base styles for mobile
+- Add desktop styles with media queries
+- Results in smaller initial CSS
 
-### Template-Based Critical CSS
+**Critical CSS:**
 
-```javascript
-// Generate critical CSS for page templates
-const templates = [
-    { name: 'home', url: '/', viewport: { width: 1300, height: 900 } },
-    { name: 'product', url: '/products/sample', viewport: { width: 1300, height: 900 } },
-    { name: 'blog', url: '/blog/sample-post', viewport: { width: 1300, height: 900 } }
-];
+- Inline the CSS needed for above-the-fold
+- Load remaining CSS asynchronously
+- Dramatically improves FCP and LCP
 
-templates.forEach(async (template) => {
-    const criticalCSS = await critical.generate({
-        src: template.url,
-        width: template.viewport.width,
-        height: template.viewport.height
-    });
-    
-    fs.writeFileSync(`critical-${template.name}.css`, criticalCSS);
-});
-```
+**Animation performance:**
 
----
-
-## 2.10 Unit II Summary
-
-### Key Concepts
-
-```
-CSS Optimization Summary:
-
-Mobile-First:
-├── Start with mobile styles
-├── Add desktop styles via min-width queries
-└── Progressive enhancement approach
-
-Performance Tuning:
-├── Simple selectors (class-based)
-├── Avoid deep nesting
-├── Remove unused CSS
-├── Minify in production
-└── Use shorthand properties
-
-Transitions:
-├── Animate transform and opacity (GPU accelerated)
-├── Avoid animating layout properties
-├── Use will-change sparingly
-└── 60fps target for smooth animations
-
-Critical CSS:
-├── Extract above-the-fold styles
-├── Inline critical CSS in <head>
-├── Load rest asynchronously
-├── Automate in build pipeline
-└── Consider per-template for multi-page sites
-```
-
----
-
-*Continue to Unit III: Image Optimization →*
+- Animate only `transform` and `opacity`
+- Avoid animating width, height, position properties
+- Use `will-change` hint for complex animations
 
 ---
 
 # Unit III: Image Optimization
 
-## 3.1 Introduction to Image Delivery
+## 3.1 Why Image Optimization Matters
 
-### Why Image Optimization Matters
+### The Image Problem
 
-Images typically account for **50-70% of a webpage's total size**. Optimizing images is one of the most impactful performance improvements you can make.
+**Images typically account for 50-70% of a webpage's total size.**
 
-```
-Typical Page Weight Breakdown:
+| Website Component | Typical Size |
+|-------------------|--------------|
+| Images | 50-70% |
+| JavaScript | 20-25% |
+| CSS | 5-10% |
+| HTML | 2-5% |
+| Fonts | 5-10% |
 
-┌─────────────────────────────────────────────┐
-│ ██████████████████████████████ Images 55%   │
-│ ████████████ JavaScript 22%                 │
-│ ████ CSS 7%                                 │
-│ ███ Fonts 6%                                │
-│ ██ HTML 4%                                  │
-│ ██ Other 6%                                 │
-└─────────────────────────────────────────────┘
-```
+**Impact of unoptimized images:**
 
-### Image Optimization Goals
-
-```
-Optimization Objectives:
-├── Reduce file size without visible quality loss
-├── Serve appropriate size for device
-├── Use modern, efficient formats
-├── Load images only when needed
-└── Prevent layout shifts
-```
+- Slow page loads
+- High bandwidth costs
+- Poor Core Web Vitals
+- Frustrated users on mobile
 
 ---
 
-## 3.2 Understanding Image Types and Applications
+## 3.2 Image Formats Explained
 
-### Image Format Comparison
+### Understanding Different Image Types
 
-| Format | Best For | Transparency | Animation | Compression |
-|--------|----------|--------------|-----------|-------------|
-| **JPEG** | Photos, gradients | ❌ | ❌ | Lossy |
-| **PNG** | Graphics, text, transparency | ✅ | ❌ | Lossless |
-| **GIF** | Simple animations | ✅ (1-bit) | ✅ | Lossless |
-| **WebP** | Photos & graphics | ✅ | ✅ | Both |
-| **AVIF** | Photos (best compression) | ✅ | ✅ | Lossy |
-| **SVG** | Icons, logos, illustrations | ✅ | ✅ | Vector |
+#### JPEG (Joint Photographic Experts Group)
 
-### Format Selection Guide
+**Best for:** Photographs, images with many colors
 
-```mermaid
-flowchart TD
-    A[Need Image?] --> B{Vector or Raster?}
-    B -->|Vector| C[SVG]
-    B -->|Raster| D{Has Transparency?}
-    D -->|No| E{Photo or Graphic?}
-    D -->|Yes| F{Browser Support?}
-    E -->|Photo| G[WebP > AVIF > JPEG]
-    E -->|Graphic| H[WebP > PNG]
-    F -->|Modern| I[WebP with PNG fallback]
-    F -->|Legacy| J[PNG-8 or PNG-24]
-```
+**Characteristics:**
 
-### JPEG Optimization
+- 16 million colors
+- Lossy compression (quality reduces with compression)
+- No transparency support
+- Small file sizes for photos
 
-```javascript
-// Quality settings guide for JPEG
-const jpegQuality = {
-    hero: 85,      // High quality for above-fold
-    product: 80,   // Good balance
-    thumbnail: 70, // Lower quality acceptable
-    background: 60 // Background images can be lower
-};
+#### PNG (Portable Network Graphics)
 
-// Using sharp for optimization
-const sharp = require('sharp');
+**Best for:** Graphics, logos, images needing transparency
 
-sharp('input.jpg')
-    .resize(800, 600)
-    .jpeg({ quality: 80, progressive: true })
-    .toFile('output.jpg');
-```
+**Two types:**
 
-### PNG Optimization
+- **PNG-8:** 256 colors, small files
+- **PNG-24:** 16 million colors, larger files
 
-```bash
-# Using pngquant for lossy PNG compression
-pngquant --quality=65-80 image.png
+**Characteristics:**
 
-# Using optipng for lossless compression
-optipng -o7 image.png
+- Lossless compression
+- Supports transparency
+- Larger than JPEG for photos
 
-# Typical savings: 40-70% size reduction
-```
+#### GIF (Graphics Interchange Format)
 
-### WebP Benefits
+**Best for:** Simple animations
 
-```
-WebP vs JPEG/PNG:
-├── 25-35% smaller than JPEG at same quality
-├── 26% smaller than PNG (lossless)
-├── Supports transparency (like PNG)
-├── Supports animation (like GIF)
-└── 96%+ browser support (2024)
-```
+**Characteristics:**
 
----
+- Only 256 colors
+- Supports animation
+- Supports transparency (but only on/off, no partial transparency)
+- Outdated - use WebP instead
 
-## 3.3 Image Delivery in CSS
+#### SVG (Scalable Vector Graphics)
 
-### Background Images
+**Best for:** Icons, logos, illustrations
 
-```css
-/* Basic background image */
-.hero {
-    background-image: url('hero.jpg');
-    background-size: cover;
-    background-position: center;
-}
+**Characteristics:**
 
-/* Responsive background with media queries */
-.hero {
-    background-image: url('hero-mobile.jpg');
-}
+- Vector format (scales infinitely without blur)
+- Usually tiny file size
+- Can be styled with CSS
+- Can be animated
 
-@media (min-width: 768px) {
-    .hero {
-        background-image: url('hero-tablet.jpg');
-    }
-}
+#### WebP (Web Picture Format)
 
-@media (min-width: 1200px) {
-    .hero {
-        background-image: url('hero-desktop.jpg');
-    }
-}
-```
+**Best for:** Everything! (Modern replacement for JPEG/PNG)
 
-### Using image-set() for Modern CSS
+**Characteristics:**
 
-```css
-/* Modern approach with format fallbacks */
-.hero {
-    background-image: url('hero.jpg'); /* Fallback */
-    background-image: image-set(
-        url('hero.avif') type('image/avif'),
-        url('hero.webp') type('image/webp'),
-        url('hero.jpg') type('image/jpeg')
-    );
-}
+- 25-35% smaller than JPEG at same quality
+- Supports transparency
+- Supports animation
+- 96%+ browser support
 
-/* Resolution switching */
-.logo {
-    background-image: image-set(
-        url('logo-1x.png') 1x,
-        url('logo-2x.png') 2x,
-        url('logo-3x.png') 3x
-    );
-}
-```
+#### AVIF (AV1 Image Format)
 
-### Optimizing CSS Background Images
+**Best for:** Maximum compression (newest format)
 
-```css
-/* ❌ BAD: Large image for all screens */
-.banner {
-    background-image: url('banner-2000px.jpg');
-}
+**Characteristics:**
 
-/* ✅ GOOD: Appropriately sized + modern format */
-.banner {
-    /* Mobile first - small image */
-    background-image: url('banner-400.webp');
-    background-size: cover;
-}
+- 50% smaller than JPEG
+- Excellent quality
+- Growing browser support (~90%)
+- Slower to encode
 
-@media (min-width: 768px) {
-    .banner {
-        background-image: url('banner-800.webp');
-    }
-}
+### Which Format to Use?
 
-@media (min-width: 1200px) {
-    .banner {
-        background-image: url('banner-1600.webp');
-    }
-}
-```
+| Situation | Recommended Format |
+|-----------|-------------------|
+| Photo | WebP > AVIF > JPEG |
+| Logo/Icon | SVG > WebP > PNG |
+| Graphic with transparency | WebP > PNG |
+| Simple animation | WebP > GIF |
+| Need maximum compatibility | JPEG/PNG with WebP fallback |
 
 ---
 
-## 3.4 Image Delivery in HTML
+## 3.3 Responsive Images
 
-### The `<img>` Tag Basics
+### The Problem with Single-Size Images
+
+**Old approach:**
 
 ```html
-<!-- ❌ BAD: No dimensions, causes layout shift -->
-<img src="photo.jpg" alt="Photo">
-
-<!-- ✅ GOOD: Dimensions prevent CLS -->
-<img src="photo.jpg" alt="Photo" width="800" height="600">
-
-<!-- ✅ BEST: Modern attributes -->
-<img src="photo.webp" 
-     alt="Descriptive alt text"
-     width="800" 
-     height="600"
-     loading="lazy"
-     decoding="async">
+<img src="hero.jpg">  <!-- Same 2000px image for all devices -->
 ```
 
-### Responsive Images with srcset
+**Problems:**
+
+- Phone users download huge image they can't display fully
+- Desktop users might get too small an image
+- Wastes bandwidth on mobile
+
+### Solution: srcset and sizes
+
+**srcset** tells the browser what images are available:
 
 ```html
-<!-- Resolution switching (same image, different sizes) -->
-<img src="image-800.jpg"
-     srcset="image-400.jpg 400w,
-             image-800.jpg 800w,
-             image-1200.jpg 1200w,
-             image-1600.jpg 1600w"
+<img src="hero-800.jpg"
+     srcset="hero-400.jpg 400w,
+             hero-800.jpg 800w,
+             hero-1200.jpg 1200w,
+             hero-1600.jpg 1600w"
      sizes="(max-width: 600px) 100vw,
             (max-width: 1200px) 50vw,
             800px"
-     alt="Responsive image">
-
-<!-- 
-Explanation:
-- srcset: Lists available images with their widths
-- sizes: Tells browser how big image will display
-- Browser calculates which image to download
--->
+     alt="Hero image">
 ```
 
-### The `<picture>` Element
+**Explanation:**
+
+- `srcset`: List of images with their widths (400w means 400 pixels wide)
+- `sizes`: Tells browser how big the image will display
+- Browser automatically chooses the best image
+
+### The picture Element
+
+**For format fallbacks and art direction:**
 
 ```html
-<!-- Art direction + format fallbacks -->
 <picture>
-    <!-- AVIF for browsers that support it -->
-    <source type="image/avif"
-            srcset="image.avif 1x, image@2x.avif 2x">
-    
-    <!-- WebP fallback -->
-    <source type="image/webp"
-            srcset="image.webp 1x, image@2x.webp 2x">
-    
-    <!-- Different crop for mobile (art direction) -->
-    <source media="(max-width: 768px)"
-            srcset="image-mobile.jpg">
-    
-    <!-- Default fallback -->
-    <img src="image.jpg" alt="Description" width="800" height="600">
+  <!-- Try AVIF first (smallest) -->
+  <source type="image/avif" srcset="hero.avif">
+  
+  <!-- Fall back to WebP -->
+  <source type="image/webp" srcset="hero.webp">
+  
+  <!-- Ultimate fallback to JPEG -->
+  <img src="hero.jpg" alt="Hero image" width="800" height="600">
 </picture>
-```
-
-### Responsive Images Decision Tree
-
-```
-Which approach to use?
-
-Same image, different sizes?
-└── Use srcset with sizes attribute
-
-Different images for different viewports?
-└── Use <picture> with media queries
-
-Multiple format support?
-└── Use <picture> with type attribute
-
-All of the above?
-└── Combine all techniques in <picture>
 ```
 
 ---
 
-## 3.5 Using Image Sprites
+## 3.4 Lazy Loading
 
-### What are Image Sprites?
+### What is Lazy Loading?
 
-Combine multiple small images into one file to reduce HTTP requests.
+**Definition:** Only loading images when they're about to become visible.
+
+**Without lazy loading:**
 
 ```
-Individual Images (❌ 10 HTTP requests):
-icon-home.png    icon-search.png   icon-cart.png
-icon-user.png    icon-menu.png     icon-close.png
-icon-arrow.png   icon-star.png     icon-heart.png
-icon-share.png
-
-Sprite Sheet (✅ 1 HTTP request):
-┌─────────────────────────────────────────────┐
-│ 🏠 | 🔍 | 🛒 | 👤 | ☰ | ✕ | → | ⭐ | ❤️ | 📤 │
-└─────────────────────────────────────────────┘
+Page loads → ALL 50 images download immediately
+(Even images at bottom of page that user might never scroll to)
 ```
 
-### Creating a Sprite Sheet
+**With lazy loading:**
+
+```
+Page loads → Only visible images download
+User scrolls → Next images download just before becoming visible
+```
+
+### Implementing Lazy Loading
+
+**Native lazy loading (simplest):**
+
+```html
+<img src="photo.jpg" loading="lazy" alt="Photo" width="800" height="600">
+```
+
+**Important:** Don't lazy load above-the-fold images!
+
+```html
+<!-- Hero image - load immediately -->
+<img src="hero.jpg" loading="eager" alt="Hero" width="1200" height="600">
+
+<!-- Below-fold images - lazy load -->
+<img src="product1.jpg" loading="lazy" alt="Product" width="400" height="300">
+```
+
+### Why Include width and height?
+
+**Without dimensions:**
+
+```
+Image space is 0 initially
+   ↓
+Image loads
+   ↓
+Page layout JUMPS to make room (CLS!)
+```
+
+**With dimensions:**
+
+```
+Browser reserves correct space from start
+   ↓
+Image loads
+   ↓
+Image appears smoothly in reserved space (no CLS!)
+```
+
+---
+
+## 3.5 Image Sprites
+
+### What is an Image Sprite?
+
+**Definition:** Combining multiple small images into one large image to reduce HTTP requests.
+
+**Without sprites:**
+
+```
+10 icon files = 10 HTTP requests
+```
+
+**With sprites:**
+
+```
+1 sprite file = 1 HTTP request
+```
+
+### How Sprites Work
 
 ```css
-/* Sprite sheet setup */
 .icon {
     background-image: url('sprites.png');
     background-repeat: no-repeat;
-    display: inline-block;
-    width: 24px;
-    height: 24px;
+    width: 32px;
+    height: 32px;
 }
 
-/* Individual icon positions */
+/* Position the sprite to show each icon */
 .icon-home   { background-position: 0 0; }
-.icon-search { background-position: -24px 0; }
-.icon-cart   { background-position: -48px 0; }
-.icon-user   { background-position: -72px 0; }
-.icon-menu   { background-position: -96px 0; }
-
-/* Usage in HTML */
-/* <span class="icon icon-home"></span> */
+.icon-search { background-position: -32px 0; }
+.icon-cart   { background-position: -64px 0; }
 ```
 
-### Automated Sprite Generation
+### When to Use Sprites in 2024
 
-```javascript
-// Using gulp.spritesmith
-const gulp = require('gulp');
-const spritesmith = require('gulp.spritesmith');
+**Less important now because:**
 
-gulp.task('sprite', function() {
-    const spriteData = gulp.src('icons/*.png')
-        .pipe(spritesmith({
-            imgName: 'sprite.png',
-            cssName: 'sprite.css',
-            padding: 2
-        }));
-    
-    spriteData.img.pipe(gulp.dest('dist/images/'));
-    spriteData.css.pipe(gulp.dest('dist/css/'));
-});
-```
+- HTTP/2 allows many parallel requests
+- SVG icons are often better
+- Icon fonts are another option
 
-### When to Use Sprites (2024 Perspective)
+**Still useful for:**
 
-```
-Use Sprites When:
-├── Many small icons (> 5-10)
-├── HTTP/1.1 server (limited connections)
-├── Icons used on multiple pages
-
-Consider Alternatives:
-├── HTTP/2 (multiplexing makes sprites less valuable)
-├── SVG icons (scalable, styleable)
-├── Icon fonts (Font Awesome, etc.)
-├── Inline SVG (no requests)
-```
+- HTTP/1.1 servers
+- Sites with many small PNG icons
+- Retro/game-style graphics
 
 ---
 
-## 3.6 Reducing Images
+## 3.6 Unit III Summary
 
-### Image Compression Tools
+**Image optimization is crucial:**
 
-| Tool | Type | Best For |
-|------|------|----------|
-| **Squoosh** | Online | Quick manual optimization |
-| **ImageOptim** | Desktop | Batch processing (Mac) |
-| **Sharp** | Node.js | Build pipeline |
-| **ImageMagick** | CLI | Server-side |
-| **TinyPNG** | API | Automated workflows |
+- Images are 50-70% of page weight
+- Unoptimized images destroy performance
 
-### Using Sharp for Batch Processing
+**Format selection:**
 
-```javascript
-const sharp = require('sharp');
-const fs = require('fs');
-const path = require('path');
+| Need | Best Format |
+|------|-------------|
+| Photos | WebP > AVIF > JPEG |
+| Icons | SVG |
+| Graphics | WebP > PNG |
 
-async function optimizeImages(inputDir, outputDir) {
-    const files = fs.readdirSync(inputDir);
-    
-    for (const file of files) {
-        const inputPath = path.join(inputDir, file);
-        const ext = path.extname(file).toLowerCase();
-        
-        if (['.jpg', '.jpeg', '.png'].includes(ext)) {
-            // Generate WebP version
-            await sharp(inputPath)
-                .resize(1200, null, { withoutEnlargement: true })
-                .webp({ quality: 80 })
-                .toFile(path.join(outputDir, file.replace(ext, '.webp')));
-            
-            // Optimize original format
-            if (ext === '.jpg' || ext === '.jpeg') {
-                await sharp(inputPath)
-                    .resize(1200, null, { withoutEnlargement: true })
-                    .jpeg({ quality: 80, progressive: true })
-                    .toFile(path.join(outputDir, file));
-            }
-        }
-    }
-}
+**Responsive images:**
 
-optimizeImages('./src/images', './dist/images');
-```
+- Use `srcset` for different sizes
+- Use `<picture>` for format fallbacks
+- Let browser choose optimal image
 
----
+**Lazy loading:**
 
-## 3.7 Encoding Images with WebP
-
-### Converting to WebP
-
-```bash
-# Using cwebp (Google's tool)
-cwebp -q 80 input.jpg -o output.webp
-
-# Batch convert with loop
-for file in *.jpg; do
-    cwebp -q 80 "$file" -o "${file%.jpg}.webp"
-done
-```
-
-```javascript
-// Using Sharp in Node.js
-const sharp = require('sharp');
-
-// JPEG to WebP
-await sharp('photo.jpg')
-    .webp({ quality: 80 })
-    .toFile('photo.webp');
-
-// PNG to WebP (lossless)
-await sharp('graphic.png')
-    .webp({ lossless: true })
-    .toFile('graphic.webp');
-
-// With resize
-await sharp('large.jpg')
-    .resize(800, 600)
-    .webp({ quality: 75 })
-    .toFile('optimized.webp');
-```
-
-### WebP with Fallback
-
-```html
-<picture>
-    <source srcset="image.webp" type="image/webp">
-    <source srcset="image.jpg" type="image/jpeg">
-    <img src="image.jpg" alt="Description" width="800" height="600">
-</picture>
-```
-
----
-
-## 3.8 Lazy Loading Images
-
-### Native Lazy Loading
-
-```html
-<!-- Native browser lazy loading -->
-<img src="photo.jpg" 
-     alt="Photo" 
-     loading="lazy"
-     width="800" 
-     height="600">
-
-<!-- Do NOT lazy load above-the-fold images -->
-<img src="hero.jpg" 
-     alt="Hero" 
-     loading="eager"
-     fetchpriority="high"
-     width="1200" 
-     height="600">
-```
-
-### Intersection Observer API
-
-```javascript
-// Custom lazy loading with Intersection Observer
-document.addEventListener('DOMContentLoaded', function() {
-    const lazyImages = document.querySelectorAll('img[data-src]');
-    
-    const imageObserver = new IntersectionObserver((entries, observer) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                const img = entry.target;
-                img.src = img.dataset.src;
-                img.removeAttribute('data-src');
-                observer.unobserve(img);
-            }
-        });
-    }, {
-        rootMargin: '50px 0px', // Load 50px before visible
-        threshold: 0.01
-    });
-    
-    lazyImages.forEach(img => imageObserver.observe(img));
-});
-```
-
-```html
-<!-- HTML for custom lazy loading -->
-<img data-src="photo.jpg" 
-     alt="Photo"
-     width="800" 
-     height="600"
-     src="placeholder.jpg">
-```
-
-### Lazy Loading Best Practices
-
-```
-Lazy Loading Rules:
-
-DO:
-├── ✅ Lazy load below-the-fold images
-├── ✅ Use native loading="lazy" when possible
-├── ✅ Provide width/height to prevent CLS
-├── ✅ Use placeholder images or skeleton screens
-└── ✅ Set appropriate rootMargin for early loading
-
-DON'T:
-├── ❌ Lazy load LCP image (hero, banner)
-├── ❌ Lazy load first viewport images
-├── ❌ Use lazy loading without dimensions
-└── ❌ Over-optimize (browser handles most cases)
-```
-
----
-
-## 3.9 Unit III Summary
-
-### Key Concepts
-
-```
-Image Optimization Summary:
-
-Format Selection:
-├── Photos → WebP > AVIF > JPEG
-├── Graphics → WebP > PNG
-├── Icons → SVG (vector)
-└── Animations → WebP > GIF
-
-Delivery Techniques:
-├── srcset/sizes → Responsive images
-├── <picture> → Art direction + format fallback
-├── Sprites → Combine small icons (HTTP/1.1)
-└── Lazy loading → Defer below-fold images
-
-Compression:
-├── Use modern formats (WebP, AVIF)
-├── Appropriate quality (70-85 for photos)
-├── Resize to actual display size
-└── Automate in build pipeline
-
-Performance Tips:
-├── Always specify width/height
-├── Use fetchpriority="high" for LCP
-├── loading="lazy" for below-fold
-└── decoding="async" for non-critical
-```
+- Use `loading="lazy"` for below-fold images
+- Never lazy load hero images
+- Always include width/height to prevent CLS
 
 ---
 
 # Unit IV: Fonts & JavaScript Optimization
 
-## 4.1 Using Fonts Wisely
+## 4.1 Web Fonts and Performance
 
-### Web Font Performance Impact
+### The Font Loading Problem
+
+**What happens when using custom fonts:**
 
 ```
-Font Loading Timeline:
-
-Text invisible ─────────────> Text visible
-        │                         │
-        ▼                         ▼
-   ┌────────────────────────────────────┐
-   │ HTML  │ CSS │ Font Download │ Paint │
-   └────────────────────────────────────┘
-                    ↑
-        FOIT (Flash of Invisible Text)
-        or
-        FOUT (Flash of Unstyled Text)
+1. HTML loads
+2. CSS loads → references custom font
+3. Browser downloads font file
+4. MEANWHILE: Text is invisible (FOIT) or shows fallback (FOUT)
+5. Font loads → Text appears in custom font
 ```
+
+**FOIT (Flash of Invisible Text)**
+
+- Text is hidden until font loads
+- Bad for users who want to read content
+
+**FOUT (Flash of Unstyled Text)**
+
+- Text shows in fallback font, then swaps
+- Slightly jarring but readable
 
 ### Font Loading Strategies
 
-| Strategy | Behavior | Use Case |
-|----------|----------|----------|
-| **FOIT** | Hide text until font loads | Brand-critical fonts |
-| **FOUT** | Show fallback, swap when ready | Content-focused sites |
-| **FOFT** | Load regular first, then variants | Complex typography |
-
-### font-display Property
+**font-display property:**
 
 ```css
 @font-face {
     font-family: 'CustomFont';
-    src: url('custom-font.woff2') format('woff2');
-    font-display: swap; /* Recommended for most cases */
+    src: url('font.woff2') format('woff2');
+    font-display: swap; /* Recommended */
 }
-
-/*
-font-display values:
-├── auto      → Browser decides (often FOIT)
-├── block     → FOIT with 3s timeout
-├── swap      → FOUT immediately (recommended)
-├── fallback  → Short FOIT (100ms), then fallback
-└── optional  → Very short FOIT, may skip font
-*/
 ```
+
+| Value | Behavior | Best For |
+|-------|----------|----------|
+| `auto` | Browser decides | Not recommended |
+| `block` | Hide text up to 3s | Brand fonts |
+| `swap` | Show fallback immediately | Most cases ✅ |
+| `fallback` | Hide briefly, then swap | Balance |
+| `optional` | Very brief hide, may skip | Performance-first |
 
 ---
 
-## 4.2 Compressing EOT and TTF Font Formats
+## 4.2 Font Formats
 
-### Font Format Comparison
+### Understanding Font File Types
 
 | Format | Size | Browser Support | Recommendation |
 |--------|------|-----------------|----------------|
-| **WOFF2** | Smallest | 97%+ | ✅ Primary format |
-| **WOFF** | Small | 99%+ | ✅ Fallback |
-| **TTF** | Large | 99%+ | Legacy only |
-| **EOT** | Large | IE only | Deprecated |
-
-### Converting Font Formats
-
-```bash
-# Using woff2_compress
-woff2_compress font.ttf
-# Creates font.woff2
-
-# Using fonttools (Python)
-pip install fonttools brotli
-pyftsubset font.ttf --output-file=font.woff2 --flavor=woff2
-```
+| **WOFF2** | Smallest | 97%+ | ✅ Use First |
+| WOFF | Small | 99%+ | Fallback |
+| TTF | Large | 99%+ | Legacy |
+| EOT | Large | IE only | Don't use |
 
 ### Modern Font Stack
 
 ```css
-/* Optimal font-face declaration */
 @font-face {
-    font-family: 'CustomFont';
+    font-family: 'MyFont';
     src: url('font.woff2') format('woff2'),
          url('font.woff') format('woff');
-    font-weight: 400;
-    font-style: normal;
     font-display: swap;
 }
 
-/* System font fallback stack */
 body {
-    font-family: 'CustomFont', 
+    font-family: 'MyFont', 
                  system-ui, 
                  -apple-system, 
-                 BlinkMacSystemFont, 
-                 'Segoe UI', 
-                 Roboto, 
                  sans-serif;
 }
 ```
 
 ---
 
-## 4.3 Subsetting Fonts
+## 4.3 Font Subsetting
 
-### What is Font Subsetting?
+### What is Subsetting?
 
-Remove unused characters from font files to reduce size dramatically.
+**Definition:** Removing unused characters from a font file.
 
-```
-Full Font: 250KB (all glyphs)
-        ↓
-Subset: 25KB (only used characters)
+**Example:**
 
-Savings: 90%!
-```
+- Full font with all languages: 250KB
+- Subset with only Latin characters: 25KB
+- 90% smaller!
 
-### Using Google Fonts Subsetting
+### How to Subset Fonts
+
+**For Latin-only websites:**
 
 ```html
-<!-- Google Fonts with text parameter -->
-<link href="https://fonts.googleapis.com/css2?family=Roboto&text=Hello%20World" rel="stylesheet">
-
-<!-- Only characters needed for specific text -->
-
-<!-- Latin subset only -->
-<link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap&subset=latin" rel="stylesheet">
+<!-- Google Fonts with subset -->
+<link href="https://fonts.googleapis.com/css2?family=Roboto&subset=latin" rel="stylesheet">
 ```
 
-### Creating Custom Subsets
-
-```bash
-# Using pyftsubset (fonttools)
-pyftsubset font.ttf \
-    --output-file=font-subset.woff2 \
-    --flavor=woff2 \
-    --layout-features='kern,liga' \
-    --unicodes="U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD"
-
-# Latin Extended subset (~95% of websites)
-```
-
-### Subset Strategies
-
-```
-Subsetting Approaches:
-
-1. Character-based
-   └── Only include specific characters used
-
-2. Unicode Range-based
-   └── Latin, Latin Extended, Cyrillic, etc.
-
-3. Feature-based
-   └── Include ligatures, kerning as needed
-
-4. Weight-based
-   └── Only weights actually used (400, 700)
-```
+**unicode-range (browser loads only what's needed):**
 
 ```css
-/* Using unicode-range for on-demand loading */
 @font-face {
-    font-family: 'CustomFont';
+    font-family: 'MyFont';
     src: url('font-latin.woff2') format('woff2');
-    unicode-range: U+0000-00FF; /* Latin */
+    unicode-range: U+0000-00FF; /* Latin characters only */
 }
-
-@font-face {
-    font-family: 'CustomFont';
-    src: url('font-cyrillic.woff2') format('woff2');
-    unicode-range: U+0400-04FF; /* Cyrillic */
-}
-/* Browser only downloads what's needed! */
 ```
 
 ---
 
-## 4.4 Optimizing the Loading of Fonts
+## 4.4 JavaScript Loading
 
-### Preloading Critical Fonts
+### How JavaScript Blocks the Page
 
-```html
-<!-- Preload primary font for faster LCP -->
-<link rel="preload" 
-      href="/fonts/main.woff2" 
-      as="font" 
-      type="font/woff2" 
-      crossorigin>
-
-<!-- Only preload fonts used above-the-fold -->
-```
-
-### Font Loading API
-
-```javascript
-// Check if font is loaded
-document.fonts.ready.then(() => {
-    console.log('All fonts loaded!');
-    document.body.classList.add('fonts-loaded');
-});
-
-// Load font programmatically
-const font = new FontFace('CustomFont', 'url(/fonts/custom.woff2)');
-
-font.load().then(loadedFont => {
-    document.fonts.add(loadedFont);
-    document.body.classList.add('custom-font-loaded');
-}).catch(err => {
-    console.error('Font loading failed:', err);
-});
-```
-
-### Complete Font Loading Strategy
+**The problem:**
 
 ```html
 <head>
-    <!-- Preload critical font -->
-    <link rel="preload" href="/fonts/main.woff2" as="font" type="font/woff2" crossorigin>
-    
-    <style>
-        /* Critical CSS with fallback fonts */
-        body {
-            font-family: 'MainFont', system-ui, sans-serif;
-        }
-        
-        @font-face {
-            font-family: 'MainFont';
-            src: url('/fonts/main.woff2') format('woff2');
-            font-display: swap;
-        }
-    </style>
+    <script src="app.js"></script>  <!-- BLOCKS everything! -->
 </head>
 ```
 
----
+When the browser encounters a `<script>` tag:
 
-## 4.5 Affecting Script-Loading Behavior
+1. Stop parsing HTML
+2. Download the script
+3. Execute the script
+4. Then continue parsing HTML
 
-### Script Loading Methods
+**This blocks the page from loading/displaying!**
+
+### Script Loading Attributes
+
+#### async
 
 ```html
-<!-- Default: Blocks parsing -->
-<script src="app.js"></script>
-
-<!-- Async: Downloads in parallel, executes when ready -->
 <script src="analytics.js" async></script>
+```
 
-<!-- Defer: Downloads in parallel, executes after HTML parsed -->
+- Downloads in parallel with HTML parsing
+- Executes immediately when downloaded (may interrupt parsing)
+- Use for: Independent scripts (analytics, ads)
+
+#### defer
+
+```html
 <script src="app.js" defer></script>
+```
 
-<!-- Module: Deferred by default -->
+- Downloads in parallel with HTML parsing
+- Executes AFTER HTML is fully parsed
+- Maintains script order
+- Use for: Main application scripts
+
+#### type="module"
+
+```html
 <script type="module" src="app.js"></script>
 ```
+
+- Modern ES6 modules
+- Deferred by default
+- Strict mode
 
 ### Visual Comparison
 
 ```
-HTML Parsing Timeline:
+Without defer/async:
+HTML: ████████─────────████████████████████████
+             ↑ stop ↑ run JS
 
-Default (blocking):
-HTML ─────█████ JS ─────█████─────────────────
-          ↑stop        ↑resume
+With async:
+HTML: ████████████████████████████████████████
+      └───JS───┘↑ run (might interrupt)
 
-Async:
-HTML ─────────────────────────────────────────
-     ████ JS ████─────────────────────────────
-          ↑executes when downloaded (can interrupt)
-
-Defer:
-HTML ─────────────────────────────────────────→ done
-     ████ JS ████                        █████
-                                         ↑executes after HTML
-```
-
-### Best Practices for Script Loading
-
-```html
-<head>
-    <!-- Critical CSS inline -->
-    <style>/* critical styles */</style>
-    
-    <!-- Preload critical JavaScript -->
-    <link rel="preload" href="critical.js" as="script">
-</head>
-<body>
-    <!-- Content -->
-    
-    <!-- Main app script - deferred -->
-    <script src="app.js" defer></script>
-    
-    <!-- Analytics - async (non-blocking) -->
-    <script src="analytics.js" async></script>
-    
-    <!-- Third-party widgets - lazy loaded -->
-    <script>
-        // Load chat widget after page load
-        window.addEventListener('load', () => {
-            const script = document.createElement('script');
-            script.src = 'chat-widget.js';
-            document.body.appendChild(script);
-        });
-    </script>
-</body>
+With defer:
+HTML: ████████████████████████████████████████→done
+      └───JS────────────────────────────┘↑ run
 ```
 
 ---
 
-## 4.6 Using Leaner jQuery-Compatible Alternatives
+## 4.5 Reducing JavaScript
 
-### jQuery Alternatives Comparison
+### The Cost of JavaScript
 
-| Library | Size (minified) | Size (gzipped) | Compatibility |
-|---------|-----------------|----------------|---------------|
-| jQuery | 87KB | 30KB | Full |
-| Zepto.js | 10KB | 4KB | Partial |
-| Cash | 6KB | 2KB | Common APIs |
-| Umbrella JS | 8KB | 3KB | DOM-focused |
-| **Vanilla JS** | 0KB | 0KB | Native APIs |
+JavaScript is expensive because:
 
-### Replacing Common jQuery Patterns
+1. **Download** - Takes time to transfer
+2. **Parse** - Browser must read the code
+3. **Compile** - Browser converts to machine code
+4. **Execute** - Browser runs the code
+
+**Same 100KB:**
+
+- Image: Only download cost
+- JavaScript: Download + Parse + Compile + Execute
+
+### Do You Need That Library?
+
+**jQuery example:**
+
+- jQuery: 87KB
+- The 5 jQuery features you actually use: ~10KB of vanilla JS
+
+**Common jQuery replacements:**
 
 ```javascript
-// jQuery → Vanilla JS equivalents
+// jQuery: $(document).ready()
+// Vanilla: 
+document.addEventListener('DOMContentLoaded', () => { });
 
-// Selecting elements
-$('.class')           →  document.querySelectorAll('.class')
-$('#id')              →  document.getElementById('id')
-$('div')              →  document.querySelectorAll('div')
+// jQuery: $('.item')
+// Vanilla:
+document.querySelectorAll('.item')
 
-// Event handling
-$('.btn').click(fn)   →  document.querySelector('.btn').addEventListener('click', fn)
-$(document).ready(fn) →  document.addEventListener('DOMContentLoaded', fn)
-
-// DOM manipulation
-$('.item').addClass('active')    →  el.classList.add('active')
-$('.item').removeClass('active') →  el.classList.remove('active')
-$('.item').toggleClass('active') →  el.classList.toggle('active')
-$('.item').hide()                →  el.style.display = 'none'
-$('.item').show()                →  el.style.display = ''
-
-// AJAX
-$.ajax({url, success})  →  fetch(url).then(r => r.json()).then(success)
-$.get(url)              →  fetch(url)
-$.post(url, data)       →  fetch(url, {method: 'POST', body: JSON.stringify(data)})
+// jQuery: $.ajax()
+// Vanilla:
+fetch(url).then(r => r.json())
 ```
 
 ---
 
-## 4.7 Getting By Without jQuery
+## 4.6 requestAnimationFrame
 
-### Modern JavaScript Equivalents
+### What is requestAnimationFrame?
 
-```javascript
-// DOM Ready
-document.addEventListener('DOMContentLoaded', () => {
-    // Your code here
-});
+**Definition:** A method that tells the browser you want to perform an animation, letting the browser optimize the animation for smooth performance.
 
-// Selecting elements
-const items = document.querySelectorAll('.item');
-const button = document.querySelector('#submit');
-
-// Iterating
-items.forEach(item => {
-    item.classList.add('processed');
-});
-
-// Event delegation
-document.addEventListener('click', (e) => {
-    if (e.target.matches('.delete-btn')) {
-        e.target.closest('.item').remove();
-    }
-});
-
-// Creating elements
-const div = document.createElement('div');
-div.className = 'card';
-div.innerHTML = '<h2>Title</h2><p>Content</p>';
-document.body.appendChild(div);
-
-// Fetch API
-async function loadData() {
-    try {
-        const response = await fetch('/api/data');
-        const data = await response.json();
-        return data;
-    } catch (error) {
-        console.error('Error:', error);
-    }
-}
-```
-
-### Utility Helper Functions
+### Why Not setTimeout/setInterval?
 
 ```javascript
-// Create your own mini-library
-const $ = (selector) => document.querySelector(selector);
-const $$ = (selector) => document.querySelectorAll(selector);
-
-const on = (el, event, fn) => el.addEventListener(event, fn);
-const off = (el, event, fn) => el.removeEventListener(event, fn);
-
-const addClass = (el, cls) => el.classList.add(cls);
-const removeClass = (el, cls) => el.classList.remove(cls);
-const toggleClass = (el, cls) => el.classList.toggle(cls);
-
-// Usage
-on($('#btn'), 'click', () => {
-    toggleClass($('.menu'), 'active');
-});
+// ❌ Bad: Arbitrary timing
+setInterval(() => {
+    updateAnimation();
+}, 16); // Trying to hit 60fps (1000/60 ≈ 16ms)
 ```
 
----
+**Problems:**
 
-## 4.8 Animating with requestAnimationFrame
-
-### Why requestAnimationFrame?
-
-```
-setTimeout/setInterval vs requestAnimationFrame:
-
-setTimeout (❌ inefficient):
-├── Runs on arbitrary interval
-├── Continues in background tabs
-├── Can cause "jank" if timing off
-└── Not synced to display refresh
-
-requestAnimationFrame (✅ optimal):
-├── Synced to display refresh rate (60fps)
-├── Pauses in background tabs
-├── Browser-optimized
-└── Smooth animations guaranteed
-```
-
-### Basic requestAnimationFrame Usage
+- May run when tab is not visible (wasting battery)
+- May not sync with screen refresh
+- Can cause "jank" (stuttering)
 
 ```javascript
-// Simple animation loop
+// ✅ Good: Browser-optimized
 function animate() {
-    // Update animation state
-    updatePosition();
-    render();
-    
-    // Request next frame
+    updateAnimation();
     requestAnimationFrame(animate);
 }
-
-// Start animation
 requestAnimationFrame(animate);
 ```
 
-### Practical Animation Example
+**Benefits:**
 
-```javascript
-// Smooth scroll animation
-function smoothScrollTo(targetY, duration = 500) {
-    const startY = window.scrollY;
-    const distance = targetY - startY;
-    let startTime = null;
-    
-    function step(currentTime) {
-        if (!startTime) startTime = currentTime;
-        const elapsed = currentTime - startTime;
-        const progress = Math.min(elapsed / duration, 1);
-        
-        // Easing function (ease-out)
-        const easeOut = 1 - Math.pow(1 - progress, 3);
-        
-        window.scrollTo(0, startY + distance * easeOut);
-        
-        if (progress < 1) {
-            requestAnimationFrame(step);
-        }
-    }
-    
-    requestAnimationFrame(step);
-}
-
-// Usage
-document.querySelector('.scroll-btn').addEventListener('click', () => {
-    const target = document.querySelector('#section').offsetTop;
-    smoothScrollTo(target, 800);
-});
-```
-
-### Element Animation Example
-
-```javascript
-// Animate element position
-function animateElement(element, from, to, duration) {
-    let startTime = null;
-    
-    function update(currentTime) {
-        if (!startTime) startTime = currentTime;
-        const elapsed = currentTime - startTime;
-        const progress = Math.min(elapsed / duration, 1);
-        
-        // Linear interpolation
-        const current = from + (to - from) * progress;
-        element.style.transform = `translateX(${current}px)`;
-        
-        if (progress < 1) {
-            requestAnimationFrame(update);
-        }
-    }
-    
-    requestAnimationFrame(update);
-}
-
-// Slide element from left
-const box = document.querySelector('.box');
-animateElement(box, -100, 0, 500);
-```
-
-### Animation Best Practices
-
-```javascript
-// Cancel animation when needed
-let animationId;
-
-function startAnimation() {
-    function animate() {
-        // Animation logic
-        animationId = requestAnimationFrame(animate);
-    }
-    animationId = requestAnimationFrame(animate);
-}
-
-function stopAnimation() {
-    cancelAnimationFrame(animationId);
-}
-
-// Throttle to reduce work per frame
-let ticking = false;
-
-window.addEventListener('scroll', () => {
-    if (!ticking) {
-        requestAnimationFrame(() => {
-            // Handle scroll
-            updateParallax();
-            ticking = false;
-        });
-        ticking = true;
-    }
-});
-```
+- Syncs with screen refresh rate (60fps)
+- Pauses when tab is hidden
+- Optimized by browser
 
 ---
 
-## 4.9 Unit IV Summary
+## 4.7 Unit IV Summary
 
-### Key Concepts
+**Font optimization:**
 
-```
-Font Optimization Summary:
+- Use WOFF2 format
+- Use `font-display: swap`
+- Subset fonts to reduce size
+- Preload critical fonts
 
-Format Priority:
-├── WOFF2 (primary) - best compression
-├── WOFF (fallback) - wide support
-└── Skip EOT/TTF in modern projects
+**JavaScript optimization:**
 
-Loading Strategy:
-├── font-display: swap (recommended)
-├── Preload critical fonts
-├── Subset to reduce size
-└── Use unicode-range for large character sets
+- Use `defer` for main scripts
+- Use `async` for independent scripts
+- Consider vanilla JS over jQuery
+- Tree-shake unused code
 
-JavaScript Optimization Summary:
+**Animation:**
 
-Loading Methods:
-├── defer → Main app scripts
-├── async → Independent scripts (analytics)
-├── module → Modern ES modules
-└── Lazy load → Third-party widgets
-
-jQuery Alternatives:
-├── Vanilla JS for most cases
-├── Cash/Zepto for jQuery syntax
-└── Fetch API replaces $.ajax
-
-Animation:
-├── requestAnimationFrame > setTimeout
-├── Sync with display refresh
-├── Pauses in background
-└── Use for smooth 60fps animations
-```
-
----
-
-*Continue to Unit V: Service Workers & Asset Delivery →*
+- Use requestAnimationFrame, not setTimeout
+- Animate only transform and opacity
+- Browser optimizes for 60fps
 
 ---
 
 # Unit V: Service Workers & Asset Delivery
 
-## 5.1 Introduction to Service Workers
+## 5.1 What is a Service Worker?
 
-### What is a Service Worker?
+### Simple Explanation
 
-A service worker is a **JavaScript file that runs in the background**, separate from your web page. It acts as a programmable proxy between your app and the network.
+**A Service Worker is like a helpful assistant that lives in your browser** and can:
 
-```mermaid
-flowchart LR
-    A[Browser] --> B[Service Worker]
-    B --> C{Cached?}
-    C -->|Yes| D[Return from Cache]
-    C -->|No| E[Fetch from Network]
-    E --> F[Cache Response]
-    F --> D
-```
+- Save files for offline use
+- Intercept network requests
+- Work in the background even when the page is closed
 
-### Service Worker Capabilities
+**Analogy:** Imagine having a personal assistant who:
 
-```
-What Service Workers Can Do:
-├── ✅ Intercept network requests
-├── ✅ Cache assets for offline use
-├── ✅ Send push notifications
-├── ✅ Background sync
-├── ✅ Handle fetch events
-└── ✅ Improve performance
-
-What They Cannot Do:
-├── ❌ Access the DOM directly
-├── ❌ Use localStorage
-├── ❌ Run on HTTP (requires HTTPS)
-└── ❌ Work in all browsers (IE)
-```
+- Keeps copies of important documents (caching)
+- Can answer simple questions without calling the office (offline support)
+- Keeps working even when you're not watching (background sync)
 
 ### Service Worker Lifecycle
 
-```mermaid
-flowchart TD
-    A[Register] --> B[Install]
-    B --> C{Success?}
-    C -->|Yes| D[Waiting]
-    C -->|No| E[Error]
-    D --> F[Activate]
-    F --> G[Controlling]
-    G --> H[Idle]
-    H -->|Fetch event| I[Handle Request]
-    I --> H
 ```
+Registration → Installation → Activation → Idle/Working
+                    ↓               ↓
+               Cache files    Clean old caches
+```
+
+### What Service Workers Enable
+
+1. **Offline Support** - Website works without internet
+2. **Faster Loading** - Serve from cache instead of network
+3. **Push Notifications** - Send alerts even when site is closed
+4. **Background Sync** - Sync data when connection is restored
 
 ---
 
-## 5.2 Writing Your First Service Worker
+## 5.2 Caching Strategies Explained
 
-### Step 1: Register the Service Worker
+### Cache First
 
-```javascript
-// main.js (in your app)
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', async () => {
-        try {
-            const registration = await navigator.serviceWorker.register('/sw.js');
-            console.log('SW registered:', registration.scope);
-        } catch (error) {
-            console.error('SW registration failed:', error);
-        }
-    });
-}
-```
+**"Check the filing cabinet before making a phone call"**
 
-### Step 2: Install Event (Cache Assets)
+1. Look in cache
+2. If found → Return cached version
+3. If not found → Fetch from network
 
-```javascript
-// sw.js
-const CACHE_NAME = 'my-app-v1';
-const ASSETS_TO_CACHE = [
-    '/',
-    '/index.html',
-    '/styles/main.css',
-    '/scripts/app.js',
-    '/images/logo.png',
-    '/offline.html'
-];
+**Best for:** Static assets (CSS, JS, images)
 
-self.addEventListener('install', (event) => {
-    event.waitUntil(
-        caches.open(CACHE_NAME)
-            .then((cache) => {
-                console.log('Caching assets...');
-                return cache.addAll(ASSETS_TO_CACHE);
-            })
-            .then(() => {
-                // Skip waiting to activate immediately
-                return self.skipWaiting();
-            })
-    );
-});
-```
+### Network First
 
-### Step 3: Activate Event (Clean Old Caches)
+**"Always try to get the latest, but have a backup"**
 
-```javascript
-// sw.js
-self.addEventListener('activate', (event) => {
-    event.waitUntil(
-        caches.keys()
-            .then((cacheNames) => {
-                return Promise.all(
-                    cacheNames
-                        .filter((name) => name !== CACHE_NAME)
-                        .map((name) => caches.delete(name))
-                );
-            })
-            .then(() => {
-                // Take control of all pages immediately
-                return self.clients.claim();
-            })
-    );
-});
-```
+1. Try to fetch from network
+2. If successful → Return response (and cache it)
+3. If network fails → Return cached version
 
-### Step 4: Fetch Event (Serve Cached Content)
-
-```javascript
-// sw.js
-self.addEventListener('fetch', (event) => {
-    event.respondWith(
-        caches.match(event.request)
-            .then((cachedResponse) => {
-                // Return cached version or fetch from network
-                return cachedResponse || fetch(event.request);
-            })
-            .catch(() => {
-                // Fallback for offline
-                if (event.request.mode === 'navigate') {
-                    return caches.match('/offline.html');
-                }
-            })
-    );
-});
-```
-
----
-
-## 5.3 Caching Strategies
-
-### Common Caching Strategies
-
-| Strategy | Description | Best For |
-|----------|-------------|----------|
-| **Cache First** | Check cache, then network | Static assets, fonts |
-| **Network First** | Check network, fallback to cache | API data, dynamic content |
-| **Stale While Revalidate** | Return cache, update in background | Balance freshness/speed |
-| **Cache Only** | Only serve from cache | Offline-first apps |
-| **Network Only** | Always fetch from network | Real-time data |
-
-### Cache First Implementation
-
-```javascript
-// Best for: CSS, JS, images, fonts
-self.addEventListener('fetch', (event) => {
-    event.respondWith(
-        caches.match(event.request)
-            .then((cached) => cached || fetch(event.request))
-    );
-});
-```
-
-### Network First Implementation
-
-```javascript
-// Best for: API calls, frequently updated content
-self.addEventListener('fetch', (event) => {
-    event.respondWith(
-        fetch(event.request)
-            .then((response) => {
-                // Clone and cache the response
-                const clone = response.clone();
-                caches.open(CACHE_NAME)
-                    .then((cache) => cache.put(event.request, clone));
-                return response;
-            })
-            .catch(() => caches.match(event.request))
-    );
-});
-```
+**Best for:** Dynamic content (API data, news articles)
 
 ### Stale While Revalidate
 
-```javascript
-// Best for: News sites, social feeds
-self.addEventListener('fetch', (event) => {
-    event.respondWith(
-        caches.open(CACHE_NAME).then((cache) => {
-            return cache.match(event.request).then((cachedResponse) => {
-                const fetchPromise = fetch(event.request).then((networkResponse) => {
-                    cache.put(event.request, networkResponse.clone());
-                    return networkResponse;
-                });
-                return cachedResponse || fetchPromise;
-            });
-        })
-    );
-});
-```
+**"Give them what you have now, but check for updates"**
+
+1. Return cached version immediately
+2. Fetch fresh version in background
+3. Update cache for next time
+
+**Best for:** Balance between speed and freshness (social feeds, blogs)
 
 ---
 
-## 5.4 Updating Your Service Worker
+## 5.3 Asset Compression
 
-### Versioning Your Cache
+### What is Compression?
 
-```javascript
-// Increment version when updating assets
-const CACHE_VERSION = 'v2';
-const CACHE_NAME = `my-app-${CACHE_VERSION}`;
+**Definition:** Making files smaller by encoding them efficiently.
 
-// Clean up old versions in activate event
-self.addEventListener('activate', (event) => {
-    event.waitUntil(
-        caches.keys().then((names) => {
-            return Promise.all(
-                names
-                    .filter((name) => name.startsWith('my-app-') && name !== CACHE_NAME)
-                    .map((name) => caches.delete(name))
-            );
-        })
-    );
-});
+**Analogy:** Instead of writing "AAAABBBCCCC", write "4A3B4C". Same information, fewer characters.
+
+### Compression Types
+
+| Algorithm | Size Reduction | Speed | Use Case |
+|-----------|---------------|-------|----------|
+| **Gzip** | 70-80% | Fast | Standard choice |
+| **Brotli** | 80-90% | Slower | Better compression |
+
+**How compression works:**
+
+```
+Original CSS: 100KB
+Gzipped: 25KB (75% smaller)
+Brotli: 20KB (80% smaller)
 ```
 
-### Prompting Users to Update
+### Enabling Compression
 
-```javascript
-// In your main app
-navigator.serviceWorker.addEventListener('controllerchange', () => {
-    // New service worker has taken control
-    if (confirm('New version available! Reload to update?')) {
-        window.location.reload();
-    }
-});
-```
+Compression is enabled on the **server side**. The browser automatically decompresses.
+
+**How it works:**
+
+1. Browser sends: "I accept gzip, br" (Accept-Encoding header)
+2. Server sends compressed file
+3. Browser decompresses automatically
+4. You see normal content
 
 ---
 
-## 5.5 Compressing Assets
+## 5.4 HTTP Caching
 
-### Gzip vs Brotli Compression
+### What is HTTP Caching?
 
-| Compression | Size Reduction | Browser Support | Speed |
-|-------------|---------------|-----------------|-------|
-| None | 0% | 100% | Fastest |
-| **Gzip** | 70-80% | 99%+ | Fast |
-| **Brotli** | 80-90% | 96%+ | Slower (better) |
+**Definition:** Telling the browser to save files locally so they don't need to be downloaded again.
 
-### Server Configuration
+### Cache-Control Header
 
-```nginx
-# Nginx - Enable Brotli and Gzip
-brotli on;
-brotli_types text/html text/css application/javascript application/json;
-brotli_comp_level 6;
-
-gzip on;
-gzip_types text/html text/css application/javascript application/json;
-gzip_comp_level 6;
-```
-
-```apache
-# Apache - Enable Gzip
-<IfModule mod_deflate.c>
-    AddOutputFilterByType DEFLATE text/html text/css application/javascript
-</IfModule>
-```
-
-### Pre-compressing Assets
-
-```bash
-# Pre-compress with gzip
-gzip -k -9 bundle.js
-# Creates bundle.js.gz
-
-# Pre-compress with brotli
-brotli -k bundle.js
-# Creates bundle.js.br
-```
-
----
-
-## 5.6 Caching Assets
-
-### HTTP Cache Headers
+The server sends instructions about how long to cache:
 
 ```
-Cache-Control Directives:
-
-├── max-age=31536000    → Cache for 1 year
-├── no-cache            → Revalidate before using
-├── no-store            → Never cache
-├── public              → Can be cached by CDN
-├── private             → Only browser can cache
-├── immutable           → Never changes (good for versioned files)
-└── stale-while-revalidate=60 → Serve stale for 60s while updating
+Cache-Control: max-age=31536000
 ```
 
-### Optimal Cache Headers by File Type
+**Translation:** "Save this file for 31,536,000 seconds (1 year)"
 
-```nginx
-# Static assets with hash in filename (immutable)
-location ~* \.(js|css|woff2|png|jpg|webp)$ {
-    add_header Cache-Control "public, max-age=31536000, immutable";
-}
+### Common Cache-Control Values
 
-# HTML files (always revalidate)
-location ~* \.html$ {
-    add_header Cache-Control "no-cache";
-}
+| Value | Meaning |
+|-------|---------|
+| `max-age=3600` | Cache for 1 hour |
+| `max-age=31536000` | Cache for 1 year |
+| `no-cache` | Always check if file changed |
+| `no-store` | Never save this file |
+| `immutable` | This file will never change |
 
-# API responses (short cache with revalidation)
-location /api/ {
-    add_header Cache-Control "private, max-age=60, stale-while-revalidate=300";
-}
-```
+### Cache-Busting
 
-### Cache-Busting with File Hashing
+**Problem:** If you cache a file for 1 year but need to update it tomorrow, users have the old version.
+
+**Solution:** Change the filename when content changes.
 
 ```html
-<!-- Without hash: browser may serve stale version -->
-<link rel="stylesheet" href="styles.css">
+<!-- Before update -->
+<link href="styles.v1.css">
 
-<!-- With hash: new hash = new file = fresh download -->
-<link rel="stylesheet" href="styles.a3f5c2d.css">
+<!-- After update -->
+<link href="styles.v2.css">
+
+<!-- Or use hashes -->
+<link href="styles.a3f5c2.css">
 ```
 
-```javascript
-// Webpack config for content hashing
-module.exports = {
-    output: {
-        filename: '[name].[contenthash].js'
-    }
-};
-```
+Browser sees new filename → Downloads new file
 
 ---
 
-## 5.7 Using CDN Assets
+## 5.5 CDN (Content Delivery Network)
 
 ### What is a CDN?
 
-**Content Delivery Network** - globally distributed servers that cache and serve your content from locations closest to users.
+**Definition:** A network of servers around the world that store copies of your files.
+
+**Without CDN:**
 
 ```
-Without CDN:
-User (Tokyo) ────────────────> Origin Server (New York)
-                              Latency: 200ms
-
-With CDN:
-User (Tokyo) ──> CDN Edge (Tokyo) ──> Origin (if not cached)
-                Latency: 20ms
+User in Tokyo → Requests file → Server in New York
+Latency: 200ms round trip
 ```
+
+**With CDN:**
+
+```
+User in Tokyo → Requests file → CDN server in Tokyo
+Latency: 20ms round trip
+```
+
+### How CDN Works
+
+1. You upload files to CDN
+2. CDN copies files to servers worldwide
+3. User requests file
+4. CDN serves from nearest server
 
 ### Popular CDNs
 
-| CDN | Best For | Pricing |
-|-----|----------|---------|
-| **Cloudflare** | General use, security | Free tier available |
-| **AWS CloudFront** | AWS ecosystem | Pay-per-use |
-| **Fastly** | Edge computing | Premium |
-| **Akamai** | Enterprise | Premium |
-| **Vercel Edge** | Next.js apps | Bundled |
-
-### CDN Best Practices
-
-```
-CDN Optimization Tips:
-├── Use consistent URLs for caching
-├── Set proper Cache-Control headers
-├── Purge cache when updating content
-├── Use edge locations near your users
-├── Enable compression at edge
-└── Consider edge computing for dynamic content
-```
+| CDN | Known For |
+|-----|-----------|
+| Cloudflare | Free tier, security features |
+| AWS CloudFront | Amazon integration |
+| Fastly | Speed, edge computing |
+| Akamai | Enterprise, global reach |
 
 ---
 
-## 5.8 Using Resource Hints
+## 5.6 Resource Hints
 
-### Resource Hint Types
+### Helping the Browser Plan Ahead
+
+**Resource hints** tell the browser about resources it will need soon.
+
+### Types of Resource Hints
+
+#### dns-prefetch
+
+**"Start looking up this domain's IP address now"**
 
 ```html
-<!-- DNS Prefetch: Resolve DNS early -->
 <link rel="dns-prefetch" href="//fonts.googleapis.com">
+```
 
-<!-- Preconnect: DNS + TCP + TLS handshake -->
-<link rel="preconnect" href="https://api.example.com">
+**When to use:** Third-party domains you'll need
 
-<!-- Prefetch: Low-priority fetch for future navigation -->
+---
+
+#### preconnect
+
+**"Set up a full connection to this server now"**
+
+```html
+<link rel="preconnect" href="https://fonts.googleapis.com">
+```
+
+**What it does:**
+
+- DNS lookup
+- TCP connection
+- TLS handshake
+
+**When to use:** Critical third-party resources
+
+---
+
+#### prefetch
+
+**"Download this file when you have time - I'll need it later"**
+
+```html
 <link rel="prefetch" href="/next-page.html">
+```
 
-<!-- Preload: High-priority fetch for current page -->
+**When to use:** Resources for the next likely page
+
+---
+
+#### preload
+
+**"Download this file RIGHT NOW - I need it for this page"**
+
+```html
 <link rel="preload" href="/critical.css" as="style">
 <link rel="preload" href="/hero.webp" as="image">
 <link rel="preload" href="/font.woff2" as="font" crossorigin>
 ```
 
-### When to Use Each Hint
-
-| Hint | Priority | Use Case |
-|------|----------|----------|
-| `dns-prefetch` | Low | Third-party domains you'll use |
-| `preconnect` | Medium | Critical third-party resources |
-| `prefetch` | Low | Resources for likely next page |
-| `preload` | High | Critical resources for this page |
-| `modulepreload` | High | ES modules needed soon |
-
-### Resource Hints Example
-
-```html
-<head>
-    <!-- Preconnect to critical third-parties -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    
-    <!-- Preload critical assets -->
-    <link rel="preload" href="/fonts/main.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="preload" href="/styles/critical.css" as="style">
-    <link rel="preload" href="/hero.webp" as="image">
-    
-    <!-- Prefetch likely next page -->
-    <link rel="prefetch" href="/products.html">
-    
-    <!-- DNS prefetch for analytics -->
-    <link rel="dns-prefetch" href="//www.google-analytics.com">
-</head>
-```
+**When to use:** Critical resources for current page
 
 ---
 
-## 5.9 Unit V Summary
+## 5.7 Unit V Summary
 
-### Key Concepts
+**Service Workers:**
 
-```
-Service Workers:
-├── Run in background
-├── Intercept network requests
-├── Enable offline functionality
-├── Cache strategies (Cache First, Network First, SWR)
-└── Version and update carefully
+- JavaScript that runs in background
+- Enables offline support and caching
+- Creates faster repeat visits
 
-Asset Compression:
-├── Brotli (best compression, 96% support)
-├── Gzip (good compression, 99% support)
-├── Pre-compress for static hosting
-└── Enable at server/CDN level
+**Caching Strategies:**
 
-Caching:
-├── Long cache for versioned assets (1 year)
-├── Short/no cache for HTML
-├── Use content hashing for cache busting
-└── Leverage CDN for global distribution
+| Strategy | Use For |
+|----------|---------|
+| Cache First | Static assets |
+| Network First | Dynamic content |
+| Stale While Revalidate | Balance |
 
-Resource Hints:
-├── preconnect → Critical third-parties
-├── preload → Critical current-page assets
-├── prefetch → Future page resources
-└── dns-prefetch → Third-party domains
-```
+**Compression:**
+
+- Gzip: 70-80% smaller
+- Brotli: 80-90% smaller (better)
+
+**CDN:**
+
+- Serves files from nearest server
+- Reduces latency dramatically
+
+**Resource Hints:**
+
+| Hint | Purpose |
+|------|---------|
+| preload | Critical current page resources |
+| prefetch | Future page resources |
+| preconnect | Establish server connection |
+| dns-prefetch | Resolve domain early |
 
 ---
 
 # Unit VI: HTTP/2 & Gulp Automation
 
-## 6.1 Need for HTTP/2
+## 6.1 Understanding HTTP
 
-### HTTP/1.1 Limitations
+### What is HTTP?
 
-```
-HTTP/1.1 Problems:
-├── Head-of-line blocking (1 request at a time per connection)
-├── Limited parallel connections (6-8 per domain)
-├── No header compression
-├── No request prioritization
-└── Workarounds needed (domain sharding, sprites, concatenation)
-```
+**HTTP (HyperText Transfer Protocol)** is the language browsers and servers use to communicate.
 
-### HTTP/2 Benefits
+**Simple analogy:** HTTP is like the rules of conversation. Both sides need to agree on how to talk to each other.
 
-```mermaid
-flowchart LR
-    subgraph "HTTP/1.1"
-        A1[Request 1] --> A2[Wait] --> A3[Request 2] --> A4[Wait] --> A5[Request 3]
-    end
-    
-    subgraph "HTTP/2"
-        B1[Request 1]
-        B2[Request 2]
-        B3[Request 3]
-    end
-    
-    B1 --> C[Multiplexed]
-    B2 --> C
-    B3 --> C
-```
+### HTTP/1.1 Problems
 
-### HTTP/2 vs HTTP/1.1 Comparison
+HTTP/1.1 was created in 1997 and has limitations:
 
-| Feature | HTTP/1.1 | HTTP/2 |
-|---------|----------|--------|
-| Connections | Multiple | Single |
-| Multiplexing | ❌ | ✅ |
-| Header Compression | ❌ | ✅ (HPACK) |
-| Server Push | ❌ | ✅ |
-| Binary Protocol | ❌ | ✅ |
-| Stream Priority | ❌ | ✅ |
+1. **Head-of-line blocking**
+   - Browser can only send one request at a time per connection
+   - Like a single-lane road - one car must wait for another
+
+2. **Limited parallel connections**
+   - Browsers open only 6-8 connections per domain
+   - Limits how many files can download simultaneously
+
+3. **Uncompressed headers**
+   - Every request sends all headers (cookies, etc.)
+   - Wastes bandwidth sending same info repeatedly
+
+4. **No prioritization**
+   - Can't say "download this file first, it's urgent!"
 
 ---
 
-## 6.2 Optimization Techniques for HTTP/2
+## 6.2 HTTP/2 Benefits
 
-### What Changes with HTTP/2
+HTTP/2 (2015) solves these problems:
 
-```
-HTTP/1.1 Best Practices      →  HTTP/2 Changes
-────────────────────────────────────────────────
-Domain sharding              →  Unnecessary (harmful)
-Image sprites                →  Less valuable
-CSS/JS concatenation         →  Less necessary
-Cookie-free domains          →  Less important
-Inlining small resources     →  Still useful for critical path
-```
+### Multiplexing
 
-### HTTP/2 Optimization Tips
+**"Multiple files over one connection"**
 
 ```
-Best Practices for HTTP/2:
-├── Single origin (no sharding)
-├── Smaller, modular files
-├── Proper caching headers
-├── Prioritize critical resources
-├── Use preload/prefetch hints
-└── Consider server push for critical assets
+HTTP/1.1:
+Connection 1: ──file1──────wait──────file2───
+Connection 2: ────file3────wait────file4─────
+Connection 3: ──────file5────wait────file6───
+
+HTTP/2:
+Connection 1: ──file1──file2──file3──file4──file5──file6──
+(All interleaved over single connection!)
 ```
+
+### Header Compression (HPACK)
+
+- Headers are compressed and cached
+- Repeat requests don't resend same headers
+- Saves bandwidth
+
+### Server Push
+
+- Server can send files before browser asks
+- "You'll need this CSS, here it is!"
+
+### Stream Prioritization
+
+- Browser can say "I need the CSS before images"
+- Critical resources load first
 
 ---
 
-## 6.3 Sending Assets with Server Push
+## 6.3 HTTP/2 Changes Optimization Strategies
+
+**Old HTTP/1.1 tricks that are NOW UNNECESSARY:**
+
+| Old Trick | Why It Was Done | HTTP/2 Reality |
+|-----------|----------------|----------------|
+| Domain Sharding | Open more connections | One connection is efficient |
+| Image Sprites | Fewer HTTP requests | Many requests are fine |
+| CSS/JS Concatenation | Fewer HTTP requests | Separate files are fine |
+| Inlining small resources | Avoid requests | Requests are cheap now |
+
+**What still matters with HTTP/2:**
+
+- Compression (gzip/brotli)
+- Proper caching
+- Image optimization
+- Critical CSS
+
+---
+
+## 6.4 Server Push
 
 ### What is Server Push?
 
-Server push allows the server to **proactively send** resources before the browser requests them.
+**Definition:** The server sends resources to the browser before the browser asks for them.
+
+**Normal flow:**
 
 ```
-Traditional:
-Browser ──> Request HTML
-Server  ──> Send HTML
-Browser ──> Parse, Request CSS
-Server  ──> Send CSS
-Browser ──> Parse, Request JS
-Server  ──> Send JS
-
-With Server Push:
-Browser ──> Request HTML
-Server  ──> Send HTML + Push CSS + Push JS (all at once!)
+Browser: "Give me HTML"
+Server: "Here's HTML"
+Browser: "Oh, I need styles.css"
+Server: "Here's CSS"
+Browser: "Oh, I need app.js"
+Server: "Here's JS"
 ```
 
-### Implementing Server Push
-
-```nginx
-# Nginx HTTP/2 Server Push
-location / {
-    http2_push /styles/critical.css;
-    http2_push /scripts/app.js;
-    http2_push /images/hero.webp;
-}
-```
-
-```javascript
-// Node.js/Express with spdy or http2
-const http2 = require('http2');
-
-server.on('stream', (stream, headers) => {
-    if (headers[':path'] === '/') {
-        // Push critical assets
-        stream.pushStream({ ':path': '/styles.css' }, (err, pushStream) => {
-            pushStream.respond({ ':status': 200 });
-            pushStream.end(cssContent);
-        });
-    }
-});
-```
-
-### Server Push Considerations
+**With Server Push:**
 
 ```
-When to Use Server Push:
-├── ✅ Critical CSS
-├── ✅ Key JavaScript
-├── ✅ Hero images
-└── ✅ Critical fonts
-
-When NOT to Use:
-├── ❌ Already cached resources
-├── ❌ Large files
-├── ❌ Non-critical resources
-└── ❌ Third-party resources
-
-Note: Use 103 Early Hints as modern alternative
+Browser: "Give me HTML"
+Server: "Here's HTML... and CSS... and JS you'll need"
+(All at once!)
 ```
 
----
+### When to Use Server Push
 
-## 6.4 Optimizing for Both HTTP/1 and HTTP/2
+**Good candidates for push:**
 
-### Detection and Conditional Optimization
+- Critical CSS
+- Main JavaScript bundle
+- Web fonts used above-the-fold
+- Hero image
 
-```javascript
-// Detect HTTP version (server-side)
-function isHTTP2(req) {
-    return req.httpVersion === '2.0';
-}
+**Don't push:**
 
-// Serve different strategies
-app.get('/', (req, res) => {
-    if (isHTTP2(req)) {
-        // HTTP/2: Separate files, server push
-        res.push('/critical.css');
-        res.push('/app.js');
-    }
-    res.sendFile('index.html');
-});
-```
-
-### Progressive Enhancement Strategy
-
-```
-Optimization Strategy:
-├── Use HTTP/2 as primary
-├── Keep individual files (no concatenation)
-├── Use preload hints (works for both)
-├── Maintain proper caching (works for both)
-└── Test on both protocols
-```
+- Resources already in browser cache
+- Large files
+- Resources not needed immediately
 
 ---
 
@@ -3013,222 +1846,101 @@ Optimization Strategy:
 
 ### What is Gulp?
 
-Gulp is a **task runner** that automates repetitive development tasks using JavaScript.
+**Gulp is a task runner** - a tool that automates repetitive tasks.
 
-```
-What Gulp Can Automate:
-├── Minify CSS/JS
-├── Compile Sass/Less
-├── Optimize images
-├── Watch for file changes
-├── Live reload browser
-├── Generate sprites
-├── Run tests
-└── Deploy to servers
-```
+**Without Gulp:**
 
-### Installing Gulp
+1. Manually compress images
+2. Manually minify CSS
+3. Manually minify JavaScript
+4. Manually copy files
+5. Repeat every time you make changes...
+
+**With Gulp:**
 
 ```bash
-# Install Gulp globally and locally
-npm install -g gulp-cli
-npm install --save-dev gulp
+gulp build  # Does ALL of the above automatically!
 ```
+
+### What Can Gulp Automate?
+
+- **Minification** - Making files smaller
+- **Compilation** - Sass → CSS, TypeScript → JavaScript
+- **Optimization** - Compress images
+- **Watching** - Auto-run tasks when files change
+- **Live Reload** - Refresh browser automatically
+- **Testing** - Run tests automatically
 
 ---
 
-## 6.6 Laying Down the Foundations
+## 6.6 Gulp Concepts
 
-### Basic Gulp Setup
+### Tasks
 
-```javascript
-// gulpfile.js
-const gulp = require('gulp');
-
-// Define a simple task
-gulp.task('hello', function(done) {
-    console.log('Hello, Gulp!');
-    done();
-});
-
-// Run with: gulp hello
-```
-
-### Gulp 4 Modern Syntax
+**A task is a function that does something specific.**
 
 ```javascript
-// gulpfile.js (ES6 style)
-const { src, dest, series, parallel, watch } = require('gulp');
-
-// Task function
-function copyHTML() {
-    return src('src/*.html')
-        .pipe(dest('dist/'));
-}
-
-// Export tasks
-exports.html = copyHTML;
-exports.default = copyHTML;
-```
-
----
-
-## 6.7 Writing Gulp Tasks
-
-### Common Gulp Tasks
-
-```javascript
-const { src, dest, series, parallel, watch } = require('gulp');
-const cleanCSS = require('gulp-clean-css');
-const uglify = require('gulp-uglify');
-const htmlmin = require('gulp-htmlmin');
-const imagemin = require('gulp-imagemin');
-
-// Minify CSS
 function minifyCSS() {
-    return src('src/css/*.css')
-        .pipe(cleanCSS({ compatibility: 'ie11' }))
-        .pipe(dest('dist/css'));
+    // Code to minify CSS files
 }
-
-// Minify JavaScript
-function minifyJS() {
-    return src('src/js/*.js')
-        .pipe(uglify())
-        .pipe(dest('dist/js'));
-}
-
-// Minify HTML
-function minifyHTML() {
-    return src('src/*.html')
-        .pipe(htmlmin({ collapseWhitespace: true }))
-        .pipe(dest('dist'));
-}
-
-// Optimize Images
-function optimizeImages() {
-    return src('src/images/*')
-        .pipe(imagemin())
-        .pipe(dest('dist/images'));
-}
-
-// Watch for changes
-function watchFiles() {
-    watch('src/css/*.css', minifyCSS);
-    watch('src/js/*.js', minifyJS);
-    watch('src/*.html', minifyHTML);
-}
-
-// Export tasks
-exports.css = minifyCSS;
-exports.js = minifyJS;
-exports.html = minifyHTML;
-exports.images = optimizeImages;
-exports.watch = watchFiles;
-
-// Build all (parallel for speed)
-exports.build = parallel(minifyCSS, minifyJS, minifyHTML, optimizeImages);
-exports.default = series(exports.build, watchFiles);
 ```
 
----
+### Pipes
 
-## 6.8 Working with Gulp Plugins
+**Pipes connect steps together.**
 
-### Essential Gulp Plugins
+Think of it like an assembly line:
 
-| Plugin | Purpose | Install |
-|--------|---------|---------|
-| `gulp-clean-css` | Minify CSS | `npm i gulp-clean-css` |
-| `gulp-uglify` | Minify JS | `npm i gulp-uglify` |
-| `gulp-htmlmin` | Minify HTML | `npm i gulp-htmlmin` |
-| `gulp-imagemin` | Optimize images | `npm i gulp-imagemin` |
-| `gulp-sass` | Compile Sass | `npm i gulp-sass sass` |
-| `gulp-concat` | Concatenate files | `npm i gulp-concat` |
-| `gulp-rename` | Rename files | `npm i gulp-rename` |
-| `gulp-sourcemaps` | Generate sourcemaps | `npm i gulp-sourcemaps` |
-| `browser-sync` | Live reload | `npm i browser-sync` |
+```
+Source files → Transform 1 → Transform 2 → Output
+```
 
-### Complete Gulp Pipeline
+### Watch
+
+**Watch monitors files and runs tasks when they change.**
 
 ```javascript
-const { src, dest, series, parallel, watch } = require('gulp');
-const sass = require('gulp-sass')(require('sass'));
-const cleanCSS = require('gulp-clean-css');
-const uglify = require('gulp-uglify');
-const rename = require('gulp-rename');
-const sourcemaps = require('gulp-sourcemaps');
-const browserSync = require('browser-sync').create();
-
-// Compile and minify Sass
-function styles() {
-    return src('src/scss/**/*.scss')
-        .pipe(sourcemaps.init())
-        .pipe(sass().on('error', sass.logError))
-        .pipe(cleanCSS())
-        .pipe(rename({ suffix: '.min' }))
-        .pipe(sourcemaps.write('.'))
-        .pipe(dest('dist/css'))
-        .pipe(browserSync.stream());
-}
-
-// Minify JavaScript
-function scripts() {
-    return src('src/js/**/*.js')
-        .pipe(sourcemaps.init())
-        .pipe(uglify())
-        .pipe(rename({ suffix: '.min' }))
-        .pipe(sourcemaps.write('.'))
-        .pipe(dest('dist/js'))
-        .pipe(browserSync.stream());
-}
-
-// Serve with live reload
-function serve() {
-    browserSync.init({
-        server: './dist'
-    });
-    
-    watch('src/scss/**/*.scss', styles);
-    watch('src/js/**/*.js', scripts);
-    watch('src/*.html').on('change', browserSync.reload);
-}
-
-exports.styles = styles;
-exports.scripts = scripts;
-exports.serve = serve;
-exports.build = parallel(styles, scripts);
-exports.default = series(exports.build, serve);
+watch('src/*.css', minifyCSS);
+// Whenever any CSS file changes, run minifyCSS
 ```
 
 ---
 
-## 6.9 Unit VI Summary
+## 6.7 Essential Gulp Plugins
 
-### Key Concepts
+| Plugin | Purpose |
+|--------|---------|
+| gulp-clean-css | Minify CSS |
+| gulp-uglify | Minify JavaScript |
+| gulp-htmlmin | Minify HTML |
+| gulp-imagemin | Optimize images |
+| gulp-sass | Compile Sass to CSS |
+| gulp-concat | Combine files |
+| gulp-rename | Rename files |
+| browser-sync | Live reload |
 
-```
-HTTP/2:
-├── Multiplexed connections (faster)
-├── Header compression
-├── Server push (proactive delivery)
-├── Fewer optimization workarounds needed
-└── Still use proper caching and compression
+---
 
-Gulp Automation:
-├── Task runner for build processes
-├── Plugins for every optimization task
-├── Watch mode for development
-├── Series (sequential) vs Parallel tasks
-└── Integrates with browser-sync for live reload
+## 6.8 Unit VI Summary
 
-Build Pipeline:
-├── Compile (Sass → CSS)
-├── Minify (CSS, JS, HTML)
-├── Optimize (Images)
-├── Sourcemaps (Debugging)
-└── Watch + Live Reload (Dev)
-```
+**HTTP/2 improvements:**
+
+- Multiplexing (many files, one connection)
+- Header compression
+- Server push
+- Stream prioritization
+
+**Optimization changes with HTTP/2:**
+
+- Domain sharding → Not needed
+- Sprites/concatenation → Less important
+- Compression/caching → Still essential
+
+**Gulp automation:**
+
+- Automates repetitive tasks
+- Save time and reduce errors
+- Essential for build pipelines
 
 ---
 
@@ -3236,510 +1948,305 @@ Build Pipeline:
 
 ## Practical 1: Minifying Assets
 
-### Objective
+**Objective:** Reduce file sizes by removing unnecessary characters.
 
-Reduce file sizes by removing unnecessary characters from CSS and JavaScript.
+**What is minification?**
+Removing whitespace, comments, and shortening variable names.
 
-### Using Gulp
+**Before minification:**
 
-```javascript
-// Install dependencies
-// npm install gulp gulp-clean-css gulp-uglify gulp-htmlmin
-
-const { src, dest, parallel } = require('gulp');
-const cleanCSS = require('gulp-clean-css');
-const uglify = require('gulp-uglify');
-const htmlmin = require('gulp-htmlmin');
-
-function minifyCSS() {
-    return src('src/css/*.css')
-        .pipe(cleanCSS())
-        .pipe(dest('dist/css'));
+```css
+/* Main container styles */
+.container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
 }
-
-function minifyJS() {
-    return src('src/js/*.js')
-        .pipe(uglify())
-        .pipe(dest('dist/js'));
-}
-
-function minifyHTML() {
-    return src('src/*.html')
-        .pipe(htmlmin({ 
-            collapseWhitespace: true,
-            removeComments: true 
-        }))
-        .pipe(dest('dist'));
-}
-
-exports.minify = parallel(minifyCSS, minifyJS, minifyHTML);
 ```
 
-### Command Line Tools
+**After minification:**
 
-```bash
-# CSS Minification
-npm install -g clean-css-cli
-cleancss -o style.min.css style.css
-
-# JavaScript Minification
-npm install -g uglify-js
-uglifyjs app.js -o app.min.js -c -m
-
-# HTML Minification
-npm install -g html-minifier
-html-minifier --collapse-whitespace index.html -o index.min.html
+```css
+.container{width:100%;max-width:1200px;margin:0 auto;padding:20px}
 ```
+
+**Savings:** Often 20-40% smaller files!
 
 ---
 
 ## Practical 2: Installing Node.js and Git
 
-### Installing Node.js
+**Node.js** - JavaScript runtime that lets you run JavaScript outside browsers. Required for most build tools.
+
+**Git** - Version control system for tracking code changes.
+
+**Installation:**
 
 ```bash
-# Windows: Download from nodejs.org
-# Or use winget:
-winget install OpenJS.NodeJS.LTS
-
-# macOS: Using Homebrew
-brew install node
-
-# Linux: Using nvm (recommended)
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
-nvm install --lts
-
-# Verify installation
+# Check if Node is installed
 node --version
-npm --version
-```
 
-### Installing Git
-
-```bash
-# Windows
-winget install Git.Git
-
-# macOS
-brew install git
-
-# Linux
-sudo apt install git  # Debian/Ubuntu
-sudo dnf install git  # Fedora
-
-# Verify
+# Check if Git is installed
 git --version
-
-# Configure Git
-git config --global user.name "Your Name"
-git config --global user.email "your@email.com"
 ```
 
 ---
 
-## Practical 3: Benchmarking JavaScript in Chrome
+## Practical 3: Benchmarking JavaScript
 
-### Using Console Timing
+**Why benchmark?**
+To find slow code that might cause TBT issues.
+
+**Simple timing:**
 
 ```javascript
-// Open DevTools Console and run:
-
-// Method 1: console.time
-console.time('loop');
-for (let i = 0; i < 1000000; i++) {
-    Math.sqrt(i);
-}
-console.timeEnd('loop');
-
-// Method 2: performance.now
-const start = performance.now();
-// Code to benchmark
-const end = performance.now();
-console.log(`Execution time: ${end - start}ms`);
-
-// Method 3: Performance marks
-performance.mark('start');
-// Code to benchmark
-performance.mark('end');
-performance.measure('My Operation', 'start', 'end');
-console.log(performance.getEntriesByType('measure'));
+console.time('operation');
+// Code to measure
+console.timeEnd('operation');
+// Output: operation: 45.234ms
 ```
 
 ---
 
 ## Practical 4: Working with SVG Images
 
-### Inline SVG
+**SVG advantages:**
+
+- Infinitely scalable (vector)
+- Usually smallest file size for icons
+- Can be styled with CSS
+- Can be animated
+
+**Using inline SVG:**
 
 ```html
-<!-- Inline SVG (most flexible) -->
-<svg width="100" height="100" viewBox="0 0 100 100">
-    <circle cx="50" cy="50" r="40" fill="#007bff"/>
+<svg width="24" height="24" viewBox="0 0 24 24">
+    <path d="M12 2L2 7v10l10 5 10-5V7z"/>
 </svg>
-
-<!-- SVG as image -->
-<img src="icon.svg" alt="Icon" width="24" height="24">
-
-<!-- SVG as background -->
-<style>
-.icon {
-    background-image: url('icon.svg');
-    width: 24px;
-    height: 24px;
-}
-</style>
-```
-
-### Optimizing SVG
-
-```bash
-# Using SVGO
-npm install -g svgo
-svgo input.svg -o output.svg
-
-# Or use SVGO config
-# svgo.config.js
-module.exports = {
-    plugins: [
-        'removeDoctype',
-        'removeComments',
-        'removeMetadata'
-    ]
-};
 ```
 
 ---
 
-## Practical 5: Media Queries for Display Targeting
+## Practical 5: Media Queries
+
+**Purpose:** Apply different styles based on screen size.
+
+**Mobile-first approach:**
 
 ```css
-/* Mobile First Approach */
+/* Base: Mobile */
+.container { width: 100%; }
 
-/* Base styles (mobile) */
-.container {
-    width: 100%;
-    padding: 1rem;
-}
-
-/* Tablet (≥768px) */
+/* Tablet and up */
 @media (min-width: 768px) {
-    .container {
-        max-width: 720px;
-        margin: 0 auto;
-    }
+    .container { width: 750px; }
 }
 
-/* Desktop (≥1024px) */
+/* Desktop */
 @media (min-width: 1024px) {
-    .container {
-        max-width: 960px;
-    }
-}
-
-/* Large screens (≥1200px) */
-@media (min-width: 1200px) {
-    .container {
-        max-width: 1140px;
-    }
-}
-
-/* High DPI displays */
-@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
-    .logo {
-        background-image: url('logo@2x.png');
-        background-size: 100px 50px;
-    }
+    .container { width: 970px; }
 }
 ```
 
 ---
 
-## Practical 6: Image Sprites
+## Practical 6: Font Subsetting
 
-```css
-/* Sprite sheet usage */
-.icon {
-    background-image: url('sprites.png');
-    background-repeat: no-repeat;
-    display: inline-block;
-    width: 32px;
-    height: 32px;
-}
+**Goal:** Reduce font file size by including only needed characters.
 
-.icon-home   { background-position: 0 0; }
-.icon-search { background-position: -32px 0; }
-.icon-cart   { background-position: -64px 0; }
-.icon-user   { background-position: -96px 0; }
-```
-
----
-
-## Practical 7: Font Subsetting
+**Commands:**
 
 ```bash
-# Using fonttools
-pip install fonttools brotli
+# Install fonttools
+pip install fonttools
 
-# Subset to Latin characters only
-pyftsubset font.ttf \
-    --output-file=font-latin.woff2 \
-    --flavor=woff2 \
-    --unicodes="U+0000-00FF"
-
-# Subset to specific text
-pyftsubset font.ttf \
-    --output-file=font-custom.woff2 \
-    --flavor=woff2 \
-    --text="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+# Create Latin-only subset
+pyftsubset font.ttf --unicodes="U+0000-00FF" --output-file=font-latin.woff2
 ```
+
+**Result:** 250KB → 25KB (90% smaller!)
 
 ---
 
-## Practical 8: requestAnimationFrame Animation
+## Practical 7: requestAnimationFrame Animation
+
+**Goal:** Create smooth, efficient animations.
 
 ```javascript
-// Smooth scroll using requestAnimationFrame
-function smoothScroll(targetY, duration = 500) {
-    const startY = window.scrollY;
-    const diff = targetY - startY;
-    let startTime = null;
-
-    function step(timestamp) {
-        if (!startTime) startTime = timestamp;
-        const progress = Math.min((timestamp - startTime) / duration, 1);
-        
-        // Easing function
-        const ease = progress < 0.5
-            ? 2 * progress * progress
-            : 1 - Math.pow(-2 * progress + 2, 2) / 2;
-        
-        window.scrollTo(0, startY + diff * ease);
-        
-        if (progress < 1) {
-            requestAnimationFrame(step);
-        }
-    }
-
-    requestAnimationFrame(step);
+function animate() {
+    // Update animation
+    element.style.transform = `translateX(${position}px)`;
+    
+    // Continue animation
+    requestAnimationFrame(animate);
 }
 
-// Usage
-document.querySelector('button').addEventListener('click', () => {
-    smoothScroll(document.querySelector('#target').offsetTop);
-});
+// Start
+requestAnimationFrame(animate);
 ```
 
 ---
 
-## Practical 9: Creating a Service Worker
+## Practical 8: Creating a Service Worker
+
+**Basic service worker for caching:**
 
 ```javascript
-// sw.js - Complete Service Worker
-const CACHE_NAME = 'app-v1';
-const ASSETS = [
-    '/',
-    '/index.html',
-    '/styles.css',
-    '/app.js',
-    '/offline.html'
-];
+// In main.js - Register service worker
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js');
+}
 
-// Install
-self.addEventListener('install', (e) => {
-    e.waitUntil(
+// sw.js - Service worker file
+const CACHE_NAME = 'my-site-v1';
+const urlsToCache = ['/', '/styles.css', '/app.js'];
+
+self.addEventListener('install', event => {
+    event.waitUntil(
         caches.open(CACHE_NAME)
-            .then(cache => cache.addAll(ASSETS))
-            .then(() => self.skipWaiting())
+            .then(cache => cache.addAll(urlsToCache))
     );
 });
 
-// Activate
-self.addEventListener('activate', (e) => {
-    e.waitUntil(
-        caches.keys().then(names => 
-            Promise.all(
-                names.filter(n => n !== CACHE_NAME)
-                    .map(n => caches.delete(n))
-            )
-        ).then(() => self.clients.claim())
-    );
-});
-
-// Fetch
-self.addEventListener('fetch', (e) => {
-    e.respondWith(
-        caches.match(e.request)
-            .then(cached => cached || fetch(e.request))
-            .catch(() => caches.match('/offline.html'))
+self.addEventListener('fetch', event => {
+    event.respondWith(
+        caches.match(event.request)
+            .then(response => response || fetch(event.request))
     );
 });
 ```
 
 ---
 
-## Practical 10: Caching Assets
+## Practical 9: Caching Assets with Cache-Control
 
-```javascript
-// Service worker caching strategies
-
-// Cache First (for static assets)
-async function cacheFirst(request) {
-    const cached = await caches.match(request);
-    return cached || fetch(request);
-}
-
-// Network First (for dynamic content)
-async function networkFirst(request) {
-    try {
-        const response = await fetch(request);
-        const cache = await caches.open(CACHE_NAME);
-        cache.put(request, response.clone());
-        return response;
-    } catch {
-        return caches.match(request);
-    }
-}
-
-// Stale While Revalidate
-async function staleWhileRevalidate(request) {
-    const cache = await caches.open(CACHE_NAME);
-    const cached = await cache.match(request);
-    
-    const fetchPromise = fetch(request).then(response => {
-        cache.put(request, response.clone());
-        return response;
-    });
-    
-    return cached || fetchPromise;
-}
-```
-
----
-
-## Practical 11: Server Push (HTTP/2)
+**Server configuration example (Nginx):**
 
 ```nginx
-# Nginx configuration for HTTP/2 Server Push
-server {
-    listen 443 ssl http2;
-    
-    location = /index.html {
-        http2_push /css/styles.css;
-        http2_push /js/app.js;
-        http2_push /images/hero.webp;
-    }
+# Cache static assets for 1 year
+location ~* \.(css|js|png|jpg|webp)$ {
+    add_header Cache-Control "max-age=31536000, immutable";
+}
+
+# Don't cache HTML
+location ~* \.html$ {
+    add_header Cache-Control "no-cache";
 }
 ```
 
 ---
 
-## Practical 12: Creating Gulp Tasks
+## Practical 10: HTTP/2 Server Push
+
+**Nginx configuration:**
+
+```nginx
+location / {
+    http2_push /styles.css;
+    http2_push /app.js;
+}
+```
+
+---
+
+## Practical 11: Creating Gulp Tasks
+
+**Complete gulpfile.js:**
 
 ```javascript
-// gulpfile.js - Complete build pipeline
-const { src, dest, series, parallel, watch } = require('gulp');
-const sass = require('gulp-sass')(require('sass'));
+const gulp = require('gulp');
 const cleanCSS = require('gulp-clean-css');
 const uglify = require('gulp-uglify');
-const imagemin = require('gulp-imagemin');
-const del = require('del');
 
-// Clean dist folder
-function clean() {
-    return del(['dist']);
-}
-
-// Compile Sass and minify
+// Minify CSS
 function styles() {
-    return src('src/scss/**/*.scss')
-        .pipe(sass())
+    return gulp.src('src/css/*.css')
         .pipe(cleanCSS())
-        .pipe(dest('dist/css'));
+        .pipe(gulp.dest('dist/css'));
 }
 
 // Minify JavaScript
 function scripts() {
-    return src('src/js/**/*.js')
+    return gulp.src('src/js/*.js')
         .pipe(uglify())
-        .pipe(dest('dist/js'));
-}
-
-// Optimize images
-function images() {
-    return src('src/images/**/*')
-        .pipe(imagemin())
-        .pipe(dest('dist/images'));
-}
-
-// Copy HTML
-function html() {
-    return src('src/*.html')
-        .pipe(dest('dist'));
+        .pipe(gulp.dest('dist/js'));
 }
 
 // Watch for changes
-function watchFiles() {
-    watch('src/scss/**/*.scss', styles);
-    watch('src/js/**/*.js', scripts);
-    watch('src/images/**/*', images);
-    watch('src/*.html', html);
+function watch() {
+    gulp.watch('src/css/*.css', styles);
+    gulp.watch('src/js/*.js', scripts);
 }
 
 // Export tasks
-exports.clean = clean;
 exports.styles = styles;
 exports.scripts = scripts;
-exports.images = images;
-exports.watch = watchFiles;
-
-exports.build = series(clean, parallel(styles, scripts, images, html));
-exports.default = series(exports.build, watchFiles);
+exports.watch = watch;
+exports.default = gulp.series(styles, scripts);
 ```
 
 ---
 
 # Course Summary
 
-## What We Covered
+## What You've Learned
 
-| Unit | Topics |
-|------|--------|
-| **I** | Web performance concepts, PageSpeed Insights, DevTools |
+| Unit | Key Topics |
+|------|------------|
+| **I** | Performance metrics (LCP, INP, CLS, TBT, TTFB), assessment tools |
 | **II** | CSS optimization, mobile-first, critical CSS |
-| **III** | Image formats, responsive images, sprites, lazy loading |
-| **IV** | Font optimization, subsetting, JavaScript loading |
-| **V** | Service workers, caching strategies, CDN, resource hints |
+| **III** | Image formats, responsive images, lazy loading |
+| **IV** | Font loading, JavaScript optimization, requestAnimationFrame |
+| **V** | Service workers, caching, CDN, resource hints |
 | **VI** | HTTP/2, server push, Gulp automation |
 
-## Key Takeaways
+## Key Performance Metrics Quick Reference
 
-```
-Performance Optimization Summary:
+| Metric | Full Name | What It Measures | Good Score |
+|--------|-----------|------------------|------------|
+| **LCP** | Largest Contentful Paint | Main content loading | ≤ 2.5s |
+| **INP** | Interaction to Next Paint | Page responsiveness | ≤ 200ms |
+| **CLS** | Cumulative Layout Shift | Visual stability | ≤ 0.1 |
+| **TTFB** | Time to First Byte | Server response | ≤ 800ms |
+| **FCP** | First Contentful Paint | First content visible | ≤ 1.8s |
+| **TBT** | Total Blocking Time | Main thread blocking | ≤ 200ms |
+| **TTI** | Time to Interactive | Full interactivity | ≤ 3.8s |
 
-Measure First:
-├── Use Lighthouse for audits
-├── Monitor Core Web Vitals
-├── Test on real devices and networks
-└── Set performance budgets
+## Optimization Checklist
 
-Optimize Loading:
-├── Compress and minify assets
-├── Use modern image formats (WebP)
-├── Lazy load below-fold content
-├── Preload critical resources
+**Loading:**
 
-Optimize Delivery:
-├── Use CDN for global distribution
-├── Enable HTTP/2
-├── Implement proper caching
-└── Use service workers for offline
+- [ ] Enable compression (gzip/brotli)
+- [ ] Use CDN
+- [ ] Implement browser caching
+- [ ] Minify CSS, JavaScript, HTML
 
-Automate Everything:
-├── Build pipeline with Gulp/Webpack
-├── Continuous integration
-├── Automated testing
-└── Performance monitoring
-```
+**Images:**
+
+- [ ] Use modern formats (WebP, AVIF)
+- [ ] Implement lazy loading
+- [ ] Specify width/height attributes
+- [ ] Use responsive images
+
+**CSS:**
+
+- [ ] Implement Critical CSS
+- [ ] Remove unused CSS
+- [ ] Use mobile-first approach
+
+**JavaScript:**
+
+- [ ] Use defer/async attributes
+- [ ] Remove unused code
+- [ ] Use requestAnimationFrame for animations
+
+**Fonts:**
+
+- [ ] Use WOFF2 format
+- [ ] Subset fonts
+- [ ] Use font-display: swap
+- [ ] Preload critical fonts
 
 ---
 
