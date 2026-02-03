@@ -102,6 +102,7 @@ Timeline:
 ```
 
 **What counts as LCP element?**
+
 - Large images
 - Video poster images
 - Background images (via CSS)
@@ -294,6 +295,7 @@ sequenceDiagram
 **Target:** Under **800 milliseconds**
 
 **What affects TTFB:**
+
 - Server location (use CDN!)
 - Server processing time
 - Database queries
@@ -377,6 +379,7 @@ graph TB
 ```
 
 **Lab vs Field Data:**
+
 - **Lab Data:** Tests run on a controlled machine (good for debugging)
 - **Field Data:** Data from real users (shows actual experience)
 
@@ -832,6 +835,7 @@ DOM Tree Visualization:
 ```
 
 **Key Points:**
+
 - DOM construction is **incremental** (starts immediately)
 - Each HTML tag becomes a **node**
 - Nodes form a **tree structure**
@@ -893,6 +897,7 @@ graph LR
 ```
 
 **What's NOT in the Render Tree:**
+
 - `<head>` and its contents
 - `<script>` tags
 - Elements with `display: none`
@@ -935,6 +940,7 @@ Layout Calculation:
 ```
 
 **Layout is triggered by:**
+
 - Initial page load
 - Window resize
 - DOM changes (adding/removing elements)
@@ -981,6 +987,7 @@ graph TB
 ```
 
 **Elements that get their own layer:**
+
 - Elements with `transform` or `opacity` animations
 - `position: fixed` elements
 - `<video>` and `<canvas>`
@@ -1267,4 +1274,1569 @@ Optimized Critical Path:
 
 ---
 
-*Continue to Section 4: HTML Optimization →*
+# Section 4: HTML Optimization
+
+## 4.1 Why HTML Optimization Matters
+
+HTML is the **foundation** of your webpage. Optimized HTML means:
+
+- Faster parsing by the browser
+- Better accessibility and SEO
+- Smoother integration with CSS and JavaScript
+
+```mermaid
+graph TD
+    A[Clean HTML] --> B[Faster Parsing]
+    A --> C[Better SEO]
+    A --> D[Improved Accessibility]
+    B --> E[⚡ Faster Page Load]
+    C --> E
+    D --> E
+    
+    style A fill:#4CAF50,color:white
+    style E fill:#2196F3,color:white
+```
+
+---
+
+## 4.2 Semantic HTML for Performance
+
+**Semantic HTML** uses meaningful tags that tell browsers AND search engines what content means.
+
+### Why Semantic HTML is Faster
+
+1. **Browser optimizations** – Browsers know how to handle `<nav>`, `<main>`, `<article>` efficiently
+2. **Less CSS needed** – Semantic elements have default styling
+3. **Better parsing** – Clear document structure
+
+```html
+<!-- ❌ BAD: Non-semantic (slower, harder to parse) -->
+<div class="header">
+    <div class="nav">
+        <div class="nav-item">Home</div>
+        <div class="nav-item">About</div>
+    </div>
+</div>
+<div class="main-content">
+    <div class="article">
+        <div class="title">My Article</div>
+        <div class="text">Content here...</div>
+    </div>
+</div>
+<div class="footer">
+    <div class="copyright">© 2024</div>
+</div>
+```
+
+```html
+<!-- ✅ GOOD: Semantic (faster, meaningful) -->
+<header>
+    <nav>
+        <a href="/">Home</a>
+        <a href="/about">About</a>
+    </nav>
+</header>
+<main>
+    <article>
+        <h1>My Article</h1>
+        <p>Content here...</p>
+    </article>
+</main>
+<footer>
+    <small>© 2024</small>
+</footer>
+```
+
+### Semantic Elements Cheat Sheet
+
+| Element | Use For |
+|---------|---------|
+| `<header>` | Page or section header |
+| `<nav>` | Navigation links |
+| `<main>` | Main content (one per page!) |
+| `<article>` | Self-contained content |
+| `<section>` | Grouped related content |
+| `<aside>` | Sidebar content |
+| `<footer>` | Page or section footer |
+| `<figure>` | Images with captions |
+| `<time>` | Dates and times |
+
+---
+
+## 4.3 Resource Hints: Preload, Prefetch, Preconnect
+
+Resource hints tell the browser to **prepare resources ahead of time**.
+
+```mermaid
+graph LR
+    subgraph Resource Hints
+        A[dns-prefetch] --> B[Resolve DNS early]
+        C[preconnect] --> D[Open connection early]
+        E[preload] --> F[Load THIS PAGE resource]
+        G[prefetch] --> H[Load NEXT PAGE resource]
+    end
+    
+    style E fill:#4CAF50,color:white
+    style C fill:#2196F3,color:white
+```
+
+---
+
+### 4.3.1 Preload (High Priority - Current Page)
+
+Use `preload` for resources needed **immediately on this page**.
+
+```html
+<head>
+    <!-- Preload critical CSS -->
+    <link rel="preload" href="critical.css" as="style">
+    
+    <!-- Preload hero image (likely LCP element) -->
+    <link rel="preload" href="hero.webp" as="image">
+    
+    <!-- Preload critical font -->
+    <link rel="preload" href="font.woff2" as="font" type="font/woff2" crossorigin>
+    
+    <!-- Preload main JavaScript -->
+    <link rel="preload" href="app.js" as="script">
+</head>
+```
+
+**The `as` attribute is required:**
+
+| `as` Value | Resource Type |
+|------------|---------------|
+| `style` | CSS files |
+| `script` | JavaScript files |
+| `font` | Font files |
+| `image` | Images |
+| `fetch` | API requests |
+
+> ⚠️ **Warning:** Only preload what you'll actually use immediately. Over-preloading wastes bandwidth!
+
+---
+
+### 4.3.2 Prefetch (Low Priority - Next Page)
+
+Use `prefetch` for resources needed on **future pages**.
+
+```html
+<head>
+    <!-- User will likely click "About" page next -->
+    <link rel="prefetch" href="/about.html">
+    
+    <!-- Prefetch JavaScript for next page -->
+    <link rel="prefetch" href="/about.js" as="script">
+</head>
+```
+
+```mermaid
+sequenceDiagram
+    participant Browser
+    participant Server
+    
+    Note over Browser: User on homepage
+    Browser->>Server: GET homepage.html
+    Browser->>Server: (idle) prefetch about.html
+    
+    Note over Browser: User clicks "About"
+    Browser->>Browser: Already cached! ⚡
+    Note over Browser: Instant navigation!
+```
+
+---
+
+### 4.3.3 Preconnect (Establish Connection Early)
+
+Use `preconnect` to establish connections to third-party domains **before you need them**.
+
+```html
+<head>
+    <!-- Preconnect to CDN -->
+    <link rel="preconnect" href="https://cdn.example.com">
+    
+    <!-- Preconnect to Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <!-- Preconnect to API server -->
+    <link rel="preconnect" href="https://api.example.com">
+</head>
+```
+
+**What preconnect does:**
+
+```
+Normal Connection:                    With Preconnect:
+                                     
+[DNS]→[TCP]→[TLS]→[Request]          [DNS+TCP+TLS done early]
+████████████████████████             ░░░░░░░░░░░░████
+     ~300ms wasted                        0ms wait!
+```
+
+---
+
+### 4.3.4 DNS-Prefetch (Lightest Hint)
+
+Use `dns-prefetch` when you only need to **resolve the domain**.
+
+```html
+<head>
+    <!-- Just resolve DNS, don't open connection -->
+    <link rel="dns-prefetch" href="https://analytics.example.com">
+</head>
+```
+
+> **Use dns-prefetch when:** You're not sure you'll use the domain, but might. It's cheap!
+
+---
+
+### 4.3.5 Resource Hints Summary
+
+| Hint | When to Use | Priority | Example |
+|------|-------------|----------|---------|
+| `preload` | Critical resources for THIS page | High | Hero image, main font |
+| `prefetch` | Resources for NEXT page | Low | Next page's JS |
+| `preconnect` | Third-party domains you'll use | Medium | Google Fonts, CDN |
+| `dns-prefetch` | Domains you might use | Lowest | Analytics |
+
+---
+
+## 4.4 Lazy Loading: Native HTML Approach
+
+### Image Lazy Loading
+
+The `loading="lazy"` attribute defers loading images until they're near the viewport.
+
+```html
+<!-- ❌ BAD: All images load immediately -->
+<img src="image1.jpg" alt="Image 1">
+<img src="image2.jpg" alt="Image 2">
+<img src="image3.jpg" alt="Image 3">
+<!-- ... 50 more images loading at once! -->
+
+<!-- ✅ GOOD: Lazy load below-the-fold images -->
+<img src="hero.jpg" alt="Hero" loading="eager">  <!-- Above fold: load immediately -->
+<img src="image1.jpg" alt="Image 1" loading="lazy">  <!-- Below fold: lazy load -->
+<img src="image2.jpg" alt="Image 2" loading="lazy">
+<img src="image3.jpg" alt="Image 3" loading="lazy">
+```
+
+```mermaid
+sequenceDiagram
+    participant Browser
+    participant Server
+    
+    Note over Browser: Page Load
+    Browser->>Server: GET hero.jpg (eager)
+    Note over Browser: Hero image loads
+    
+    Note over Browser: User scrolls...
+    Browser->>Browser: Image approaching viewport
+    Browser->>Server: GET image1.jpg (lazy)
+    Note over Browser: Image loads just in time!
+```
+
+### Iframe Lazy Loading
+
+```html
+<!-- Lazy load embedded videos and maps -->
+<iframe 
+    src="https://www.youtube.com/embed/xyz" 
+    loading="lazy"
+    title="Video title">
+</iframe>
+
+<iframe 
+    src="https://maps.google.com/..." 
+    loading="lazy"
+    title="Location map">
+</iframe>
+```
+
+> **Important:** Don't lazy load LCP images! Your hero/main image should use `loading="eager"` (or omit the attribute).
+
+---
+
+## 4.5 The `fetchpriority` Attribute
+
+Tell the browser which resources are **most important**.
+
+```html
+<!-- High priority: LCP element -->
+<img src="hero.jpg" alt="Hero" fetchpriority="high">
+
+<!-- Low priority: Below-the-fold images -->
+<img src="footer-image.jpg" alt="Footer" fetchpriority="low">
+
+<!-- High priority script -->
+<script src="critical.js" fetchpriority="high"></script>
+
+<!-- Low priority script -->
+<script src="analytics.js" fetchpriority="low"></script>
+```
+
+**Priority values:**
+
+| Value | When to Use |
+|-------|-------------|
+| `high` | LCP image, critical above-fold content |
+| `low` | Below-fold images, non-critical resources |
+| `auto` | Default (browser decides) |
+
+---
+
+## 4.6 Optimizing the Document Head
+
+The `<head>` section should be lean and optimized.
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- 1. Character encoding FIRST (within first 1024 bytes) -->
+    <meta charset="UTF-8">
+    
+    <!-- 2. Viewport for responsive design -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- 3. Preconnect to critical origins -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <!-- 4. Preload critical resources -->
+    <link rel="preload" href="critical.css" as="style">
+    <link rel="preload" href="font.woff2" as="font" type="font/woff2" crossorigin>
+    
+    <!-- 5. Critical CSS (inline) -->
+    <style>
+        /* Minimal above-the-fold styles */
+        :root { --primary: #007bff; }
+        body { margin: 0; font-family: system-ui; }
+        .hero { min-height: 100vh; }
+    </style>
+    
+    <!-- 6. Non-critical CSS (async) -->
+    <link rel="stylesheet" href="styles.css" media="print" onload="this.media='all'">
+    
+    <!-- 7. Title and meta (for SEO) -->
+    <title>Page Title</title>
+    <meta name="description" content="Page description">
+    
+    <!-- 8. Deferred JavaScript -->
+    <script src="app.js" defer></script>
+</head>
+```
+
+---
+
+## 4.7 Avoiding Common HTML Mistakes
+
+### Mistake 1: Missing Image Dimensions
+
+```html
+<!-- ❌ BAD: Causes layout shift (CLS) -->
+<img src="photo.jpg" alt="Photo">
+
+<!-- ✅ GOOD: Dimensions prevent layout shift -->
+<img src="photo.jpg" alt="Photo" width="800" height="600">
+```
+
+### Mistake 2: Blocking Scripts in Head
+
+```html
+<!-- ❌ BAD: Blocks parsing -->
+<head>
+    <script src="huge-library.js"></script>
+</head>
+
+<!-- ✅ GOOD: Non-blocking -->
+<head>
+    <script src="huge-library.js" defer></script>
+</head>
+```
+
+### Mistake 3: Too Many HTTP Requests
+
+```html
+<!-- ❌ BAD: 5 separate requests -->
+<link rel="stylesheet" href="reset.css">
+<link rel="stylesheet" href="grid.css">
+<link rel="stylesheet" href="buttons.css">
+<link rel="stylesheet" href="forms.css">
+<link rel="stylesheet" href="utilities.css">
+
+<!-- ✅ GOOD: 1 combined, minified request -->
+<link rel="stylesheet" href="styles.min.css">
+```
+
+### Mistake 4: Not Using Responsive Images
+
+```html
+<!-- ❌ BAD: Same large image for all devices -->
+<img src="hero-2000px.jpg" alt="Hero">
+
+<!-- ✅ GOOD: Responsive images -->
+<img 
+    src="hero-800.jpg" 
+    srcset="hero-400.jpg 400w,
+            hero-800.jpg 800w,
+            hero-1200.jpg 1200w,
+            hero-2000.jpg 2000w"
+    sizes="100vw"
+    alt="Hero">
+```
+
+---
+
+## 4.8 HTML Optimization Checklist
+
+```
+✅ HTML Optimization Checklist:
+
+□ Use semantic HTML elements
+□ Add width/height to all images
+□ Use loading="lazy" for below-fold images
+□ Use fetchpriority="high" for LCP image
+□ Preload critical resources (fonts, hero image)
+□ Preconnect to third-party domains
+□ Inline critical CSS
+□ Defer non-critical JavaScript
+□ Minimize HTTP requests
+□ Use responsive images with srcset
+```
+
+---
+
+## 4.9 Key Takeaways ✨
+
+1. **Semantic HTML** improves parsing speed and SEO
+2. **Preload** critical resources, **prefetch** next-page resources
+3. **Lazy load** images below the fold
+4. **Always set dimensions** on images to prevent layout shifts
+5. Structure your `<head>` for optimal loading order
+
+---
+
+# Section 5: CSS Optimization
+
+## 5.1 Why CSS Performance Matters
+
+CSS is **render-blocking** – the browser won't paint anything until CSS is parsed. Slow CSS = slow first paint!
+
+```mermaid
+graph LR
+    A[HTML Parsed] --> B{CSS Ready?}
+    B -->|No| C[⏳ Wait...]
+    B -->|Yes| D[🎨 Render!]
+    C --> B
+    
+    style C fill:#F44336,color:white
+    style D fill:#4CAF50,color:white
+```
+
+**Impact of CSS on Performance:**
+
+| Problem | Effect on Metrics |
+|---------|------------------|
+| Large CSS file | Slower FCP, LCP |
+| Unused CSS | Wasted bandwidth |
+| Complex selectors | Slower style calculation |
+| Layout-triggering properties | Lower frame rate |
+
+---
+
+## 5.2 Critical CSS: The #1 CSS Optimization
+
+**Critical CSS** is the minimum CSS needed to render above-the-fold content.
+
+### The Problem
+
+```
+Traditional Loading:
+[Download 500KB CSS] → [Parse all] → [Render]
+████████████████████████████████████ (slow!)
+```
+
+### The Solution
+
+```
+Optimized Loading:
+[Inline 15KB critical CSS] → [Render!] → [Load rest async]
+████████ → 🎨 → ░░░░░░░░░░░░░░░░░░░░░
+(fast first paint!)
+```
+
+### Implementing Critical CSS
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <!-- Step 1: Inline critical CSS -->
+    <style>
+        /* Only above-the-fold styles (~15KB max) */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: system-ui, sans-serif;
+            line-height: 1.6;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 1rem 2rem;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding-top: 60px;
+        }
+        
+        .hero h1 {
+            font-size: clamp(2rem, 5vw, 4rem);
+            text-align: center;
+        }
+    </style>
+    
+    <!-- Step 2: Load rest of CSS asynchronously -->
+    <link rel="preload" href="styles.css" as="style" 
+          onload="this.onload=null;this.rel='stylesheet'">
+    <noscript>
+        <link rel="stylesheet" href="styles.css">
+    </noscript>
+</head>
+```
+
+### Tools to Extract Critical CSS
+
+```bash
+# Using critical (npm package)
+npm install -g critical
+
+# Extract critical CSS
+critical index.html --base ./ --inline --minify > index-critical.html
+
+# Or with penthouse
+npm install -g penthouse
+penthouse https://example.com styles.css > critical.css
+```
+
+---
+
+## 5.3 CSS Minification
+
+**Minification** removes unnecessary characters from CSS.
+
+### Before Minification (2.5KB)
+
+```css
+/* Main navigation styles */
+.navigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    background-color: #ffffff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.navigation .logo {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #333333;
+}
+
+.navigation .menu {
+    display: flex;
+    gap: 2rem;
+    list-style: none;
+}
+```
+
+### After Minification (1.2KB - 52% smaller!)
+
+```css
+.navigation{display:flex;justify-content:space-between;align-items:center;padding:1rem 2rem;background-color:#fff;box-shadow:0 2px 4px rgba(0,0,0,.1)}.navigation .logo{font-size:1.5rem;font-weight:700;color:#333}.navigation .menu{display:flex;gap:2rem;list-style:none}
+```
+
+### Minification Tools
+
+```bash
+# Using cssnano (most popular)
+npm install cssnano postcss-cli
+
+# Create postcss.config.js
+# module.exports = { plugins: [require('cssnano')] }
+
+# Run minification
+npx postcss styles.css -o styles.min.css
+
+# Using clean-css
+npm install -g clean-css-cli
+cleancss -o styles.min.css styles.css
+```
+
+---
+
+## 5.4 Removing Unused CSS
+
+Most websites only use 20-40% of their CSS!
+
+```mermaid
+pie title Typical CSS Usage
+    "Used CSS" : 30
+    "Unused CSS" : 70
+```
+
+### Finding Unused CSS with Chrome DevTools
+
+```
+Steps:
+1. Open DevTools (F12)
+2. Press Ctrl+Shift+P
+3. Type "Coverage" → Show Coverage
+4. Click 🔴 Record
+5. Refresh page and interact
+6. See unused CSS in RED
+```
+
+### Removing Unused CSS with PurgeCSS
+
+```bash
+# Install PurgeCSS
+npm install purgecss
+
+# Create purgecss.config.js
+```
+
+```javascript
+// purgecss.config.js
+module.exports = {
+    content: ['./src/**/*.html', './src/**/*.js'],
+    css: ['./src/styles.css'],
+    output: './dist/',
+    
+    // Don't remove these classes (dynamic classes)
+    safelist: [
+        'active',
+        'is-open',
+        'modal-open',
+        /^data-/
+    ]
+};
+```
+
+```bash
+# Run PurgeCSS
+npx purgecss --config purgecss.config.js
+```
+
+### Before vs After PurgeCSS
+
+```
+Before: styles.css (245KB)
+After:  styles.css (32KB)
+Savings: 87%! 🎉
+```
+
+---
+
+## 5.5 Efficient CSS Selectors
+
+The browser reads selectors **right to left**. Complex selectors = slower matching.
+
+### Selector Performance (Fastest to Slowest)
+
+```css
+/* 🟢 FASTEST: ID selector */
+#header { }
+
+/* 🟢 FAST: Class selector */
+.header { }
+
+/* 🟡 MEDIUM: Tag selector */
+header { }
+
+/* 🟡 MEDIUM: Attribute selector */
+[type="text"] { }
+
+/* 🔴 SLOW: Descendant selector (deep) */
+.page .content .article .text p { }
+
+/* 🔴 SLOW: Universal selector */
+* { }
+
+/* 🔴 SLOWEST: Complex pseudo-selectors */
+div:nth-child(3n+1):not(.special) { }
+```
+
+### Optimizing Selectors
+
+```css
+/* ❌ BAD: Browser must check every <a> to see if it's in .nav in .header */
+.header .nav ul li a { }
+
+/* ✅ GOOD: Direct class - instant match */
+.nav-link { }
+```
+
+```css
+/* ❌ BAD: Overly specific, hard to override */
+body div.container main article.post h2.title { }
+
+/* ✅ GOOD: Simple and specific enough */
+.post-title { }
+```
+
+### BEM Naming Convention
+
+BEM (Block Element Modifier) creates efficient, flat selectors:
+
+```css
+/* BEM Structure */
+.block { }
+.block__element { }
+.block--modifier { }
+
+/* Example */
+.card { }
+.card__title { }
+.card__image { }
+.card--featured { }
+.card--compact { }
+```
+
+```html
+<article class="card card--featured">
+    <img class="card__image" src="..." alt="...">
+    <h2 class="card__title">Title</h2>
+</article>
+```
+
+---
+
+## 5.6 CSS Containment
+
+CSS Containment tells the browser **what parts of the page are independent**, so it can optimize rendering.
+
+```css
+/* The browser doesn't need to recalculate 
+   outside elements when this changes */
+.card {
+    contain: layout style paint;
+}
+
+/* Shorthand for maximum containment */
+.widget {
+    contain: strict;
+}
+
+/* Content-aware containment (respects intrinsic size) */
+.sidebar {
+    contain: content;
+}
+```
+
+### Containment Values
+
+| Value | What It Contains |
+|-------|-----------------|
+| `layout` | Size and position |
+| `style` | CSS counters and quotes |
+| `paint` | Nothing paints outside |
+| `size` | Size doesn't depend on children |
+| `content` | `layout` + `style` + `paint` |
+| `strict` | `layout` + `style` + `paint` + `size` |
+
+---
+
+## 5.7 Conditional CSS Loading with Media Queries
+
+Load CSS only when needed!
+
+```html
+<!-- Only load on screens (not print) -->
+<link rel="stylesheet" href="screen.css" media="screen">
+
+<!-- Only load for print -->
+<link rel="stylesheet" href="print.css" media="print">
+
+<!-- Only load for large screens -->
+<link rel="stylesheet" href="desktop.css" media="(min-width: 1024px)">
+
+<!-- Only load for mobile -->
+<link rel="stylesheet" href="mobile.css" media="(max-width: 768px)">
+
+<!-- Only load if user prefers dark mode -->
+<link rel="stylesheet" href="dark.css" media="(prefers-color-scheme: dark)">
+```
+
+> **Note:** Non-matching media queries load with **low priority**, so they don't block rendering!
+
+---
+
+## 5.8 Avoiding Layout Thrashing
+
+**Layout thrashing** happens when JavaScript repeatedly reads and writes layout properties.
+
+```javascript
+// ❌ BAD: Layout thrashing (read-write-read-write)
+const elements = document.querySelectorAll('.item');
+elements.forEach(el => {
+    const height = el.offsetHeight;  // READ (forces layout)
+    el.style.height = height + 10 + 'px';  // WRITE (invalidates layout)
+    // Next iteration: READ again (forces NEW layout)
+});
+
+// ✅ GOOD: Batch reads, then batch writes
+const elements = document.querySelectorAll('.item');
+
+// Batch all reads first
+const heights = Array.from(elements).map(el => el.offsetHeight);
+
+// Then batch all writes
+elements.forEach((el, i) => {
+    el.style.height = heights[i] + 10 + 'px';
+});
+```
+
+### Properties That Trigger Layout
+
+Avoid reading these in loops:
+
+```
+offsetTop, offsetLeft, offsetWidth, offsetHeight
+scrollTop, scrollLeft, scrollWidth, scrollHeight
+clientTop, clientLeft, clientWidth, clientHeight
+getComputedStyle()
+getBoundingClientRect()
+```
+
+---
+
+## 5.9 `will-change` Property
+
+Tell the browser to prepare for a change (creates a new compositor layer).
+
+```css
+/* ✅ Good: Preparing for animation */
+.animated-element {
+    will-change: transform;
+}
+
+/* After animation completes, remove it */
+.animated-element.done {
+    will-change: auto;
+}
+```
+
+```css
+/* ❌ BAD: Don't overuse! */
+* {
+    will-change: transform, opacity; /* Creates too many layers! */
+}
+
+/* ❌ BAD: Don't use for non-animating elements */
+.static-element {
+    will-change: transform; /* Waste of memory */
+}
+```
+
+---
+
+## 5.10 Modern CSS Performance Features
+
+### CSS Layers (`@layer`)
+
+Control specificity and organize CSS:
+
+```css
+/* Define layer order */
+@layer reset, base, components, utilities;
+
+/* Lower layers are overridden by higher layers */
+@layer reset {
+    * { margin: 0; padding: 0; }
+}
+
+@layer base {
+    body { font-family: system-ui; }
+}
+
+@layer components {
+    .btn { padding: 0.5rem 1rem; }
+}
+
+@layer utilities {
+    .mt-4 { margin-top: 1rem; }  /* Always wins! */
+}
+```
+
+### Container Queries
+
+Style based on container size (not viewport):
+
+```css
+.card-container {
+    container-type: inline-size;
+}
+
+@container (min-width: 400px) {
+    .card {
+        display: flex;
+        gap: 1rem;
+    }
+}
+```
+
+---
+
+## 5.11 CSS Optimization Checklist
+
+```
+✅ CSS Optimization Checklist:
+
+□ Inline critical CSS (above-the-fold)
+□ Load non-critical CSS asynchronously
+□ Minify all CSS files
+□ Remove unused CSS with PurgeCSS
+□ Use simple, flat selectors (BEM)
+□ Avoid deep descendant selectors
+□ Use CSS containment for components
+□ Use media queries for conditional loading
+□ Avoid layout thrashing in JS
+□ Use will-change sparingly
+□ Compress CSS files (gzip/brotli)
+```
+
+---
+
+## 5.12 Key Takeaways ✨
+
+1. **Critical CSS inline** is the biggest win
+2. **Remove unused CSS** – most sites waste 60%+ of CSS
+3. **Keep selectors simple** – avoid deep nesting
+4. **Minify and compress** everything
+5. **Use containment** to help the browser optimize
+
+---
+
+# Section 6: JavaScript Optimization
+
+## 6.1 Why JavaScript is the Performance Killer
+
+JavaScript is often the **biggest performance bottleneck** because:
+
+1. It must be **downloaded** (network time)
+2. It must be **parsed** (CPU time)
+3. It must be **compiled** (CPU time)
+4. It must be **executed** (CPU time)
+5. It **blocks the main thread** during execution
+
+```mermaid
+graph TD
+    A[Download JS] --> B[Parse]
+    B --> C[Compile]
+    C --> D[Execute]
+    D --> E[DOM Ready]
+    
+    A -->|Network| F[⏱️ 500ms]
+    B -->|CPU| G[⏱️ 200ms]
+    C -->|CPU| H[⏱️ 100ms]
+    D -->|CPU| I[⏱️ 300ms]
+    
+    style A fill:#FF5722,color:white
+    style D fill:#F44336,color:white
+```
+
+**The Cost of JavaScript:**
+
+| Bundle Size | Parse Time | Impact |
+|-------------|------------|--------|
+| 100KB | ~50ms | Minimal |
+| 500KB | ~250ms | Noticeable |
+| 1MB | ~500ms | Problematic |
+| 2MB+ | ~1000ms+ | Critical issue |
+
+---
+
+## 6.2 Script Loading: async vs defer
+
+The most important JavaScript optimization is **how you load it**.
+
+### Visual Comparison
+
+```mermaid
+gantt
+    title Script Loading Strategies
+    dateFormat X
+    axisFormat %s
+    
+    section Normal Script
+    HTML Parse :a1, 0, 2
+    Block :crit, a2, 2, 4
+    Script Exec :a3, 4, 5
+    Resume HTML :a4, 5, 7
+    
+    section Async Script
+    HTML Parse :b1, 0, 7
+    Download :b2, 0, 2
+    Script Exec :crit, b3, 2, 3
+    
+    section Defer Script
+    HTML Parse :c1, 0, 5
+    Download :c2, 0, 2
+    Script Exec :c3, 5, 6
+```
+
+### Code Examples
+
+```html
+<!-- ❌ Normal: Blocks HTML parsing -->
+<script src="app.js"></script>
+
+<!-- ✅ Async: Download parallel, execute ASAP (interrupts parsing) -->
+<script src="analytics.js" async></script>
+
+<!-- ✅✅ Defer: Download parallel, execute AFTER DOM ready (best for most scripts) -->
+<script src="app.js" defer></script>
+```
+
+### When to Use Each
+
+| Attribute | Order | Execute When | Best For |
+|-----------|-------|--------------|----------|
+| None | In order | Immediately | Critical inline scripts |
+| `async` | Any order | When ready | Analytics, ads, independent scripts |
+| `defer` | In order | After DOM | App code, libraries, most scripts |
+
+```html
+<!-- Typical optimized setup -->
+<head>
+    <!-- Critical third-party: async (independent, no order needed) -->
+    <script src="https://analytics.com/script.js" async></script>
+    
+    <!-- Your app scripts: defer (need DOM, need order) -->
+    <script src="vendor.js" defer></script>
+    <script src="app.js" defer></script>
+</head>
+```
+
+---
+
+## 6.3 Code Splitting
+
+**Code splitting** breaks your bundle into smaller chunks that load on demand.
+
+```mermaid
+graph LR
+    A[bundle.js<br/>500KB] --> B[main.js<br/>100KB]
+    A --> C[dashboard.js<br/>150KB]
+    A --> D[settings.js<br/>80KB]
+    A --> E[reports.js<br/>170KB]
+    
+    B --> F[Load immediately]
+    C --> G[Load when needed]
+    D --> G
+    E --> G
+    
+    style A fill:#F44336,color:white
+    style B fill:#4CAF50,color:white
+```
+
+### Dynamic Imports (Lazy Loading)
+
+```javascript
+// ❌ BAD: Load everything upfront
+import Dashboard from './Dashboard';
+import Settings from './Settings';
+import Reports from './Reports';
+
+// ✅ GOOD: Load on demand
+async function loadDashboard() {
+    const { Dashboard } = await import('./Dashboard.js');
+    return Dashboard;
+}
+
+// Only loads when user clicks
+document.getElementById('dashboardBtn').onclick = async () => {
+    const Dashboard = await loadDashboard();
+    new Dashboard().render();
+};
+```
+
+### Route-Based Code Splitting (React Example)
+
+```javascript
+import { lazy, Suspense } from 'react';
+
+// Lazy load route components
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const Settings = lazy(() => import('./pages/Settings'));
+const Reports = lazy(() => import('./pages/Reports'));
+
+function App() {
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <Routes>
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/settings" element={<Settings />} />
+                <Route path="/reports" element={<Reports />} />
+            </Routes>
+        </Suspense>
+    );
+}
+```
+
+---
+
+## 6.4 Tree Shaking
+
+**Tree shaking** removes unused code from your bundles.
+
+```javascript
+// utils.js - Library with many functions
+export function formatDate(date) { /*...*/ }
+export function formatCurrency(amount) { /*...*/ }
+export function formatPhone(phone) { /*...*/ }
+export function formatAddress(addr) { /*...*/ }
+export function formatName(name) { /*...*/ }
+// ... 50 more functions
+
+// app.js - Only uses ONE function
+import { formatDate } from './utils.js';
+
+console.log(formatDate(new Date()));
+```
+
+```
+Without Tree Shaking:          With Tree Shaking:
+┌────────────────────┐         ┌────────────────────┐
+│ formatDate ✓       │         │ formatDate ✓       │
+│ formatCurrency ✗   │         └────────────────────┘
+│ formatPhone ✗      │         
+│ formatAddress ✗    │         Bundle: 2KB (only what's used!)
+│ formatName ✗       │
+│ ... 50 more ✗      │
+└────────────────────┘
+Bundle: 50KB (everything!)
+```
+
+### Enabling Tree Shaking
+
+```javascript
+// package.json - Mark package as side-effect free
+{
+    "name": "my-library",
+    "sideEffects": false
+}
+
+// Or specify which files have side effects
+{
+    "sideEffects": [
+        "*.css",
+        "./src/polyfills.js"
+    ]
+}
+```
+
+### Import Only What You Need
+
+```javascript
+// ❌ BAD: Imports entire library
+import _ from 'lodash';
+_.debounce(fn, 300);
+
+// ✅ GOOD: Import only the function
+import debounce from 'lodash/debounce';
+debounce(fn, 300);
+
+// ✅✅ BEST: Use lodash-es for tree shaking
+import { debounce } from 'lodash-es';
+debounce(fn, 300);
+```
+
+---
+
+## 6.5 Minification and Compression
+
+### Minification (Build Time)
+
+```javascript
+// Before minification (readable - 1.2KB)
+function calculateTotalPrice(items, taxRate) {
+    let subtotal = 0;
+    
+    for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        subtotal += item.price * item.quantity;
+    }
+    
+    const tax = subtotal * taxRate;
+    const total = subtotal + tax;
+    
+    return {
+        subtotal: subtotal,
+        tax: tax,
+        total: total
+    };
+}
+
+// After minification (machine-readable - 180 bytes)
+function calculateTotalPrice(t,e){let a=0;for(let l=0;l<t.length;l++){const n=t[l];a+=n.price*n.quantity}const r=a*e;return{subtotal:a,tax:r,total:a+r}}
+```
+
+### Compression (Server Time)
+
+| Format | Compression | Browser Support |
+|--------|-------------|-----------------|
+| None | 0% | All |
+| Gzip | ~70% | All |
+| Brotli | ~80% | Modern browsers |
+
+```
+Original:    500KB
+Gzip:        150KB (70% smaller)
+Brotli:      100KB (80% smaller)
+```
+
+---
+
+## 6.6 Avoiding Long Tasks
+
+**Long tasks** (>50ms) block the main thread and hurt INP.
+
+```mermaid
+graph LR
+    A[User Click] --> B{Main Thread Busy?}
+    B -->|Yes, Long Task| C[😤 Wait 300ms...]
+    B -->|No| D[😊 Instant response!]
+    C --> E[Finally responds]
+    D --> E
+    
+    style C fill:#F44336,color:white
+    style D fill:#4CAF50,color:white
+```
+
+### Breaking Up Long Tasks
+
+```javascript
+// ❌ BAD: One long task (blocks for 500ms)
+function processAllItems(items) {
+    items.forEach(item => {
+        heavyProcessing(item);  // 5ms each × 100 items = 500ms!
+    });
+}
+
+// ✅ GOOD: Break into chunks with yields
+async function processAllItems(items) {
+    const CHUNK_SIZE = 10;
+    
+    for (let i = 0; i < items.length; i += CHUNK_SIZE) {
+        const chunk = items.slice(i, i + CHUNK_SIZE);
+        
+        chunk.forEach(item => heavyProcessing(item));
+        
+        // Yield to main thread
+        await scheduler.yield?.() || 
+              new Promise(r => setTimeout(r, 0));
+    }
+}
+```
+
+### Using `requestIdleCallback`
+
+```javascript
+// Process work during idle periods
+function processInBackground(items) {
+    let index = 0;
+    
+    function processNext(deadline) {
+        // Process while we have time
+        while (index < items.length && deadline.timeRemaining() > 5) {
+            heavyProcessing(items[index]);
+            index++;
+        }
+        
+        // More items? Schedule next idle callback
+        if (index < items.length) {
+            requestIdleCallback(processNext);
+        }
+    }
+    
+    requestIdleCallback(processNext);
+}
+```
+
+### Using Web Workers
+
+Move heavy computation off the main thread entirely:
+
+```javascript
+// main.js
+const worker = new Worker('worker.js');
+
+worker.postMessage({ items: largeDataSet });
+
+worker.onmessage = (e) => {
+    console.log('Result:', e.data);
+};
+
+// worker.js
+self.onmessage = (e) => {
+    const { items } = e.data;
+    
+    // Heavy processing happens here (doesn't block main thread!)
+    const result = items.map(item => heavyProcessing(item));
+    
+    self.postMessage(result);
+};
+```
+
+---
+
+## 6.7 Bundle Analysis
+
+Find what's making your bundles big!
+
+### Using webpack-bundle-analyzer
+
+```bash
+# Install
+npm install webpack-bundle-analyzer --save-dev
+
+# Add to webpack.config.js
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+
+module.exports = {
+    plugins: [
+        new BundleAnalyzerPlugin()
+    ]
+};
+
+# Run build and see visualization
+npm run build
+```
+
+### Using source-map-explorer
+
+```bash
+# Install
+npm install source-map-explorer --save-dev
+
+# Analyze
+npx source-map-explorer dist/main.js
+```
+
+### What to Look For
+
+```
+Bundle Analysis Visualization:
+
+┌─────────────────────────────────────────────────────────┐
+│                          main.js (500KB)                │
+├─────────────────────────────────────────────────────────┤
+│                                                         │
+│  ┌───────────────────────────┐  ┌───────────────────┐  │
+│  │       moment.js           │  │      lodash       │  │
+│  │        (200KB)            │  │      (80KB)       │  │
+│  │                           │  │                   │  │
+│  │  🔴 PROBLEMATIC!          │  │  🟡 Consider      │  │
+│  │  Use date-fns instead     │  │  lodash-es        │  │
+│  └───────────────────────────┘  └───────────────────┘  │
+│                                                         │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────────┐ │
+│  │  Your Code  │  │   React     │  │    Others       │ │
+│  │   (50KB)    │  │   (40KB)    │  │    (130KB)      │ │
+│  │      ✓      │  │      ✓      │  │                 │ │
+│  └─────────────┘  └─────────────┘  └─────────────────┘ │
+│                                                         │
+└─────────────────────────────────────────────────────────┘
+```
+
+### Common Heavy Libraries and Alternatives
+
+| Heavy Library | Size | Lighter Alternative | Size |
+|--------------|------|---------------------|------|
+| Moment.js | 232KB | date-fns | 32KB |
+| Lodash | 72KB | lodash-es (tree-shakeable) | ~2KB used |
+| jQuery | 87KB | Vanilla JS | 0KB |
+| Axios | 13KB | fetch API | 0KB |
+
+---
+
+## 6.8 Third-Party Script Management
+
+Third-party scripts are often the **biggest performance problem**.
+
+### Audit Third-Party Scripts
+
+```javascript
+// Check how much third-party JS you're loading
+// Run in DevTools Console:
+
+const scripts = document.querySelectorAll('script[src]');
+const thirdParty = Array.from(scripts).filter(s => 
+    !s.src.includes(location.hostname)
+);
+console.table(thirdParty.map(s => ({ src: s.src })));
+```
+
+### Loading Strategies
+
+```html
+<!-- ❌ BAD: Blocking third-party -->
+<script src="https://slow-analytics.com/script.js"></script>
+
+<!-- ✅ GOOD: Async third-party -->
+<script src="https://analytics.com/script.js" async></script>
+
+<!-- ✅✅ BETTER: Load after page is interactive -->
+<script>
+    window.addEventListener('load', () => {
+        const script = document.createElement('script');
+        script.src = 'https://analytics.com/script.js';
+        document.body.appendChild(script);
+    });
+</script>
+
+<!-- ✅✅✅ BEST: Load on user interaction (for chat widgets, etc.) -->
+<script>
+    document.addEventListener('mousemove', function loadChat() {
+        const script = document.createElement('script');
+        script.src = 'https://chat-widget.com/script.js';
+        document.body.appendChild(script);
+        document.removeEventListener('mousemove', loadChat);
+    }, { once: true });
+</script>
+```
+
+### Using Facades for Heavy Embeds
+
+```html
+<!-- ❌ BAD: YouTube embed loads 1MB+ immediately -->
+<iframe src="https://youtube.com/embed/xyz" 
+        width="560" height="315"></iframe>
+
+<!-- ✅ GOOD: Facade pattern - load on click -->
+<div class="youtube-facade" 
+     data-video-id="xyz"
+     onclick="loadYouTube(this)">
+    <img src="https://i.ytimg.com/vi/xyz/maxresdefault.jpg" 
+         alt="Video thumbnail">
+    <button class="play-button">▶ Play</button>
+</div>
+
+<script>
+function loadYouTube(el) {
+    const videoId = el.dataset.videoId;
+    const iframe = document.createElement('iframe');
+    iframe.src = `https://youtube.com/embed/${videoId}?autoplay=1`;
+    iframe.width = 560;
+    iframe.height = 315;
+    iframe.allow = 'autoplay';
+    el.replaceWith(iframe);
+}
+</script>
+```
+
+---
+
+## 6.9 Efficient DOM Manipulation
+
+### Batch DOM Updates
+
+```javascript
+// ❌ BAD: Multiple reflows
+const list = document.getElementById('list');
+items.forEach(item => {
+    const li = document.createElement('li');
+    li.textContent = item;
+    list.appendChild(li);  // Reflow on each append!
+});
+
+// ✅ GOOD: Single reflow with DocumentFragment
+const list = document.getElementById('list');
+const fragment = document.createDocumentFragment();
+
+items.forEach(item => {
+    const li = document.createElement('li');
+    li.textContent = item;
+    fragment.appendChild(li);  // No reflow yet
+});
+
+list.appendChild(fragment);  // One reflow!
+```
+
+### Use `textContent` Instead of `innerHTML`
+
+```javascript
+// ❌ Slower: innerHTML requires parsing
+element.innerHTML = 'Hello, World!';
+
+// ✅ Faster: textContent is direct
+element.textContent = 'Hello, World!';
+```
+
+### Cache DOM Queries
+
+```javascript
+// ❌ BAD: Query DOM repeatedly
+function updateUI() {
+    document.getElementById('count').textContent = count;  // Query
+    document.getElementById('count').classList.add('updated');  // Query again!
+}
+
+// ✅ GOOD: Cache the reference
+const countEl = document.getElementById('count');
+function updateUI() {
+    countEl.textContent = count;
+    countEl.classList.add('updated');
+}
+```
+
+---
+
+## 6.10 JavaScript Performance Checklist
+
+```
+✅ JavaScript Optimization Checklist:
+
+□ Use defer for app scripts, async for analytics
+□ Implement code splitting for routes/features
+□ Enable tree shaking (ES modules, sideEffects: false)
+□ Minify all JavaScript
+□ Enable gzip/brotli compression
+□ Break up long tasks (< 50ms each)
+□ Use Web Workers for heavy computation
+□ Analyze bundles regularly
+□ Audit third-party scripts
+□ Use facades for heavy embeds
+□ Batch DOM updates
+□ Cache DOM references
+□ Lazy load below-fold functionality
+```
+
+---
+
+## 6.11 Key Takeaways ✨
+
+1. **`defer` is your friend** – Use it for most scripts
+2. **Code split aggressively** – Only load what's needed
+3. **Tree shake everything** – Use ES modules
+4. **Watch your bundle size** – Use bundle analyzer regularly
+5. **Third-party scripts are dangerous** – Load them carefully
+6. **Keep tasks short** – Break up work < 50ms
+
+---
+
+*Continue to Section 7: Image Optimization →*
