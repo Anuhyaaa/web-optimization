@@ -2839,4 +2839,2037 @@ function updateUI() {
 
 ---
 
-*Continue to Section 7: Image Optimization →*
+# Section 7: Image Optimization
+
+## 7.1 Why Images Are Critical
+
+Images typically account for **50-70% of a webpage's total size**. They're often the biggest opportunity for optimization!
+
+```mermaid
+pie title Typical Webpage Weight
+    "Images" : 60
+    "JavaScript" : 25
+    "CSS" : 5
+    "HTML" : 3
+    "Fonts" : 5
+    "Other" : 2
+```
+
+**Impact of Unoptimized Images:**
+
+| Problem | Effect |
+|---------|--------|
+| Large file size | Slow LCP, high bandwidth |
+| Wrong format | Wasted bytes |
+| No lazy loading | Slow initial load |
+| Missing dimensions | Layout shift (CLS) |
+| No responsive images | Mobile bandwidth waste |
+
+---
+
+## 7.2 Image Format Selection
+
+Choosing the right format can cut image size by 50-80%!
+
+### Format Comparison
+
+| Format | Best For | Compression | Transparency | Animation |
+|--------|----------|-------------|--------------|-----------|
+| **JPEG** | Photos | Lossy | ❌ | ❌ |
+| **PNG** | Graphics, icons | Lossless | ✅ | ❌ |
+| **WebP** | Everything | Both | ✅ | ✅ |
+| **AVIF** | Everything (better) | Both | ✅ | ✅ |
+| **SVG** | Icons, logos | Vector | ✅ | ✅ |
+| **GIF** | Simple animations | Lossless | ✅ | ✅ |
+
+### Size Comparison (Same Image)
+
+```
+Photo (1200x800 pixels):
+┌────────────────────────────────────────────────────────┐
+│ JPEG (quality 80)     ████████████████████  200KB     │
+│ PNG                   ████████████████████████████████│ 800KB
+│ WebP (quality 80)     ██████████████       140KB      │
+│ AVIF (quality 80)     ██████████           100KB      │ ← Best!
+└────────────────────────────────────────────────────────┘
+```
+
+### Format Decision Flowchart
+
+```mermaid
+flowchart TD
+    A[What type of image?] --> B{Vector/Icon?}
+    B -->|Yes| C[Use SVG]
+    B -->|No| D{Needs Animation?}
+    D -->|Yes| E{Complex?}
+    E -->|Simple| F[Use GIF or Animated WebP]
+    E -->|Complex| G[Use Video instead]
+    D -->|No| H{Photo or Complex?}
+    H -->|Photo| I{Browser Support?}
+    H -->|Simple Graphic| J{Transparency?}
+    J -->|Yes| K[Use WebP or PNG]
+    J -->|No| L[Use WebP or JPEG]
+    I -->|Modern| M[Use AVIF with WebP fallback]
+    I -->|Legacy| N[Use WebP with JPEG fallback]
+    
+    style C fill:#4CAF50,color:white
+    style M fill:#4CAF50,color:white
+```
+
+---
+
+## 7.3 The `<picture>` Element
+
+Use `<picture>` to serve different formats with fallbacks.
+
+### Format Fallback Pattern
+
+```html
+<picture>
+    <!-- Best format first (browsers pick first supported) -->
+    <source srcset="image.avif" type="image/avif">
+    <source srcset="image.webp" type="image/webp">
+    
+    <!-- Fallback for old browsers -->
+    <img src="image.jpg" alt="Description" 
+         width="800" height="600"
+         loading="lazy">
+</picture>
+```
+
+### Art Direction (Different Images for Devices)
+
+```html
+<picture>
+    <!-- Wide desktop: panoramic crop -->
+    <source media="(min-width: 1200px)" 
+            srcset="hero-wide.webp"
+            type="image/webp">
+    
+    <!-- Tablet: standard crop -->
+    <source media="(min-width: 768px)" 
+            srcset="hero-medium.webp"
+            type="image/webp">
+    
+    <!-- Mobile: square crop (better for small screens) -->
+    <source srcset="hero-square.webp"
+            type="image/webp">
+    
+    <!-- Fallback -->
+    <img src="hero-medium.jpg" alt="Hero image"
+         width="800" height="600">
+</picture>
+```
+
+---
+
+## 7.4 Responsive Images with `srcset` and `sizes`
+
+Let the browser choose the right image size for the device!
+
+### Basic `srcset` (Resolution Switching)
+
+```html
+<!-- Browser picks the best size based on viewport and pixel density -->
+<img 
+    src="photo-800.jpg"
+    srcset="photo-400.jpg 400w,
+            photo-800.jpg 800w,
+            photo-1200.jpg 1200w,
+            photo-1600.jpg 1600w"
+    sizes="100vw"
+    alt="Beautiful landscape"
+    width="800" height="600"
+    loading="lazy">
+```
+
+### Understanding `srcset` Syntax
+
+```html
+<!-- Format: filename [width]w -->
+srcset="small.jpg 400w,     ← 400 pixels wide
+        medium.jpg 800w,    ← 800 pixels wide
+        large.jpg 1600w"    ← 1600 pixels wide
+```
+
+### Understanding `sizes` Syntax
+
+```html
+<!-- Tell browser how big the image will display -->
+sizes="(max-width: 600px) 100vw,   ← On mobile: full width
+       (max-width: 1200px) 50vw,   ← On tablet: half width
+       800px"                       ← On desktop: 800px fixed
+```
+
+### Complete Responsive Image Example
+
+```html
+<img 
+    src="product-800.jpg"
+    srcset="product-400.jpg 400w,
+            product-600.jpg 600w,
+            product-800.jpg 800w,
+            product-1200.jpg 1200w"
+    sizes="(max-width: 480px) 100vw,
+           (max-width: 768px) 50vw,
+           (max-width: 1200px) 33vw,
+           400px"
+    alt="Product name"
+    width="400" height="400"
+    loading="lazy"
+    decoding="async">
+```
+
+### How the Browser Chooses
+
+```
+Device: iPhone 14 Pro (390px viewport, 3x pixel density)
+sizes="(max-width: 480px) 100vw" → Image displays at 390px
+Actual pixels needed: 390px × 3 = 1170px
+
+Browser picks: product-1200.jpg (closest to 1170px)
+```
+
+---
+
+## 7.5 Lazy Loading Images
+
+Only load images when they're about to enter the viewport.
+
+### Native Lazy Loading
+
+```html
+<!-- Above the fold: load immediately (LCP candidate) -->
+<img src="hero.jpg" alt="Hero" 
+     loading="eager"
+     fetchpriority="high">
+
+<!-- Below the fold: lazy load -->
+<img src="gallery-1.jpg" alt="Gallery" loading="lazy">
+<img src="gallery-2.jpg" alt="Gallery" loading="lazy">
+<img src="gallery-3.jpg" alt="Gallery" loading="lazy">
+```
+
+### Lazy Loading Best Practices
+
+```html
+<!-- ✅ DO: Lazy load below-fold images -->
+<img src="footer-image.jpg" loading="lazy" alt="...">
+
+<!-- ❌ DON'T: Lazy load the LCP image -->
+<img src="hero.jpg" loading="lazy" alt="...">  <!-- Wrong! -->
+
+<!-- ❌ DON'T: Lazy load above-fold images -->
+<img src="logo.jpg" loading="lazy" alt="...">  <!-- Wrong! -->
+```
+
+### JavaScript Lazy Loading (For More Control)
+
+```javascript
+// Using Intersection Observer
+const lazyImages = document.querySelectorAll('img[data-src]');
+
+const imageObserver = new IntersectionObserver((entries, observer) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            const img = entry.target;
+            img.src = img.dataset.src;
+            img.removeAttribute('data-src');
+            observer.unobserve(img);
+        }
+    });
+}, {
+    rootMargin: '50px 0px'  // Start loading 50px before visible
+});
+
+lazyImages.forEach(img => imageObserver.observe(img));
+```
+
+```html
+<!-- HTML for JS lazy loading -->
+<img data-src="real-image.jpg" 
+     src="tiny-placeholder.jpg"
+     alt="Description">
+```
+
+---
+
+## 7.6 Image Compression
+
+### Compression Types
+
+| Type | How It Works | Quality Loss | Best For |
+|------|--------------|--------------|----------|
+| **Lossless** | Removes redundant data | None | Graphics, screenshots |
+| **Lossy** | Removes less-visible data | Some | Photos |
+
+### Quality Settings
+
+```
+JPEG/WebP Quality Levels:
+┌────────────────────────────────────────────────────────┐
+│ 100% → Perfect quality, huge file                     │
+│ 90%  → Unnoticeable loss, still large                │
+│ 80%  → Slight loss, good balance ← RECOMMENDED       │
+│ 70%  → Noticeable on zoom, much smaller              │
+│ 50%  → Visible artifacts, very small                 │
+└────────────────────────────────────────────────────────┘
+```
+
+### Compression Tools
+
+**Online Tools:**
+
+- Squoosh (squoosh.app) - Google's free tool
+- TinyPNG/TinyJPG
+- ImageOptim (Mac)
+
+**CLI Tools:**
+
+```bash
+# ImageMagick
+convert input.jpg -quality 80 output.jpg
+
+# cwebp (WebP)
+cwebp -q 80 input.png -o output.webp
+
+# avifenc (AVIF)
+avifenc --min 20 --max 40 input.png output.avif
+
+# Sharp (Node.js)
+npm install sharp
+```
+
+```javascript
+// Using Sharp
+const sharp = require('sharp');
+
+sharp('input.jpg')
+    .resize(800, 600)
+    .webp({ quality: 80 })
+    .toFile('output.webp');
+```
+
+---
+
+## 7.7 Image CDN Services
+
+Image CDNs optimize and serve images automatically.
+
+### Popular Image CDNs
+
+| Service | Features |
+|---------|----------|
+| **Cloudinary** | Transform, optimize, deliver |
+| **imgix** | Real-time processing |
+| **Cloudflare Images** | Simple, fast |
+| **Vercel Image Optimization** | Next.js integration |
+
+### CDN URL Parameters
+
+```html
+<!-- Cloudinary example -->
+<img src="https://res.cloudinary.com/demo/image/upload/
+          w_800,          <!-- Width: 800px -->
+          h_600,          <!-- Height: 600px -->
+          c_fill,         <!-- Crop: fill -->
+          f_auto,         <!-- Format: auto (WebP/AVIF) -->
+          q_auto          <!-- Quality: auto -->
+          /sample.jpg"
+     alt="Sample">
+
+<!-- Simplified URL -->
+<img src="https://res.cloudinary.com/demo/image/upload/w_800,f_auto,q_auto/sample.jpg">
+```
+
+---
+
+## 7.8 Placeholder Strategies
+
+Show something while images load to prevent layout shift.
+
+### Blur-Up Technique (LQIP)
+
+```html
+<!-- Low Quality Image Placeholder -->
+<div class="image-wrapper">
+    <img class="placeholder" 
+         src="tiny-blurred-20px.jpg"
+         alt="">
+    <img class="full-image" 
+         src="full-image.jpg" 
+         loading="lazy"
+         onload="this.previousElementSibling.remove()"
+         alt="Description">
+</div>
+
+<style>
+.image-wrapper {
+    position: relative;
+}
+.placeholder {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    filter: blur(20px);
+    transform: scale(1.1);
+}
+.full-image {
+    display: block;
+    width: 100%;
+}
+</style>
+```
+
+### Solid Color Placeholder
+
+```html
+<div class="image-container" style="background-color: #e0e0e0;">
+    <img src="image.jpg" 
+         loading="lazy"
+         alt="Description">
+</div>
+```
+
+### Skeleton Loading
+
+```html
+<div class="image-skeleton">
+    <img src="image.jpg" 
+         loading="lazy"
+         onload="this.parentElement.classList.remove('loading')"
+         alt="Description">
+</div>
+
+<style>
+.image-skeleton.loading {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+</style>
+```
+
+---
+
+## 7.9 Image Optimization Checklist
+
+```
+✅ Image Optimization Checklist:
+
+□ Use modern formats (WebP, AVIF with fallbacks)
+□ Implement responsive images with srcset/sizes
+□ Set width and height attributes (prevent CLS)
+□ Lazy load below-fold images
+□ Use fetchpriority="high" for LCP image
+□ Compress images (quality 80 is usually fine)
+□ Use an image CDN for automatic optimization
+□ Implement blur-up/skeleton placeholders
+□ Optimize hero/LCP images first
+□ Consider using <picture> for art direction
+```
+
+---
+
+## 7.10 Key Takeaways ✨
+
+1. **WebP/AVIF** with JPEG fallback is the standard
+2. **Responsive images** save mobile bandwidth
+3. **Lazy load** everything except LCP
+4. **Always set dimensions** to prevent layout shift
+5. **Image CDNs** handle optimization automatically
+
+---
+
+# Section 8: Font Optimization
+
+## 8.1 Why Font Performance Matters
+
+Custom fonts can cause:
+
+- **FOIT** (Flash of Invisible Text) - Text hidden until font loads
+- **FOUT** (Flash of Unstyled Text) - System font switches to custom font
+- **Layout Shift** - Text size changes when font loads
+
+```mermaid
+graph LR
+    A[Request Page] --> B{Font Loaded?}
+    B -->|No| C[FOIT: Invisible text 😵]
+    B -->|No| D[FOUT: System font shown 😐]
+    B -->|Yes| E[Custom font displayed ✅]
+    C --> E
+    D --> E
+```
+
+---
+
+## 8.2 The `font-display` Property
+
+Control how fonts load and display.
+
+```css
+@font-face {
+    font-family: 'CustomFont';
+    src: url('font.woff2') format('woff2');
+    font-display: swap; /* ← The key property */
+}
+```
+
+### `font-display` Values
+
+| Value | Behavior | Best For |
+|-------|----------|----------|
+| `auto` | Browser decides | (not recommended) |
+| `block` | Hide text up to 3s, then fallback | Rarely needed |
+| `swap` | Show fallback immediately, swap when ready | **Body text** |
+| `fallback` | Hide 100ms, fallback, short swap window | Balance |
+| `optional` | Hide 100ms, use font only if cached | **Best performance** |
+
+### Recommended Strategy
+
+```css
+/* Body text: swap (readable immediately) */
+@font-face {
+    font-family: 'BodyFont';
+    src: url('body.woff2') format('woff2');
+    font-display: swap;
+}
+
+/* Headings: optional (nice-to-have) */
+@font-face {
+    font-family: 'HeadingFont';
+    src: url('heading.woff2') format('woff2');
+    font-display: optional;
+}
+```
+
+---
+
+## 8.3 Preloading Fonts
+
+Load critical fonts as early as possible.
+
+```html
+<head>
+    <!-- Preload ONLY your most critical font -->
+    <link rel="preload" 
+          href="/fonts/main.woff2" 
+          as="font" 
+          type="font/woff2" 
+          crossorigin>
+    
+    <!-- Then the CSS that uses it -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+```
+
+> ⚠️ **Warning:** Only preload 1-2 critical fonts. Over-preloading delays other resources!
+
+### Complete Font Loading Pattern
+
+```html
+<head>
+    <!-- 1. Preconnect to font origin (if using Google Fonts) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <!-- 2. Preload critical font file -->
+    <link rel="preload" 
+          href="/fonts/inter-var.woff2" 
+          as="font" 
+          type="font/woff2" 
+          crossorigin>
+    
+    <!-- 3. Font CSS -->
+    <style>
+        @font-face {
+            font-family: 'Inter';
+            src: url('/fonts/inter-var.woff2') format('woff2');
+            font-display: swap;
+            font-weight: 100 900;
+        }
+        
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+        }
+    </style>
+</head>
+```
+
+---
+
+## 8.4 Self-Hosting vs Google Fonts
+
+### Google Fonts
+
+```html
+<!-- Easy but slower (external request) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" 
+      rel="stylesheet">
+```
+
+### Self-Hosting (Recommended)
+
+```css
+/* Faster (no external requests) */
+@font-face {
+    font-family: 'Inter';
+    src: url('/fonts/inter-400.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Inter';
+    src: url('/fonts/inter-600.woff2') format('woff2');
+    font-weight: 600;
+    font-style: normal;
+    font-display: swap;
+}
+```
+
+### Download Google Fonts for Self-Hosting
+
+```bash
+# Use google-webfonts-helper
+# https://gwfh.mranftl.com/fonts
+
+# Or use fontaine CLI
+npx fontaine
+```
+
+---
+
+## 8.5 Font Subsetting
+
+Remove characters you don't need to reduce file size.
+
+```
+Full Inter font:     ~300KB (all languages, all characters)
+Latin subset:        ~20KB  (English + Western European)
+Your actual usage:   ~15KB  (just what you need)
+```
+
+### Using subset with Google Fonts
+
+```html
+<!-- Unicode range for Latin characters only -->
+<link href="https://fonts.googleapis.com/css2?family=Inter&text=ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789&display=swap" 
+      rel="stylesheet">
+```
+
+### Manual Subsetting
+
+```bash
+# Using pyftsubset (fonttools)
+pip install fonttools
+
+pyftsubset font.ttf \
+    --output-file=font-subset.woff2 \
+    --flavor=woff2 \
+    --unicodes="U+0000-00FF"  # Basic Latin
+```
+
+### CSS Unicode Range
+
+```css
+/* Load different files for different character sets */
+@font-face {
+    font-family: 'Inter';
+    src: url('/fonts/inter-latin.woff2') format('woff2');
+    font-display: swap;
+    unicode-range: U+0000-00FF; /* Latin */
+}
+
+@font-face {
+    font-family: 'Inter';
+    src: url('/fonts/inter-cyrillic.woff2') format('woff2');
+    font-display: swap;
+    unicode-range: U+0400-04FF; /* Cyrillic - only loads if needed */
+}
+```
+
+---
+
+## 8.6 Variable Fonts
+
+One file for all weights and styles!
+
+```
+Traditional:                      Variable:
+├── font-regular.woff2 (20KB)    ├── font-variable.woff2 (40KB)
+├── font-medium.woff2 (20KB)     │   (ALL weights in ONE file!)
+├── font-semibold.woff2 (20KB)   │
+├── font-bold.woff2 (20KB)       │
+└── Total: 80KB                  └── Total: 40KB (50% savings!)
+```
+
+### Using Variable Fonts
+
+```css
+@font-face {
+    font-family: 'Inter';
+    src: url('/fonts/inter-variable.woff2') format('woff2');
+    font-weight: 100 900;  /* Full weight range */
+    font-display: swap;
+}
+
+/* Use any weight! */
+.light { font-weight: 300; }
+.regular { font-weight: 400; }
+.medium { font-weight: 500; }
+.semibold { font-weight: 600; }
+.bold { font-weight: 700; }
+
+/* Even in-between weights! */
+.custom { font-weight: 450; }
+```
+
+---
+
+## 8.7 System Font Stack
+
+Skip custom fonts entirely for maximum performance!
+
+```css
+/* Modern System Font Stack */
+body {
+    font-family: 
+        system-ui,           /* Modern system font */
+        -apple-system,       /* Safari fallback */
+        BlinkMacSystemFont,  /* Chrome Mac fallback */
+        'Segoe UI',          /* Windows */
+        Roboto,              /* Android */
+        'Helvetica Neue',    /* Old Mac */
+        Arial,               /* Universal fallback */
+        sans-serif;          /* Final fallback */
+}
+
+/* Monospace System Font Stack */
+code {
+    font-family:
+        ui-monospace,
+        'SF Mono',
+        SFMono-Regular,
+        Menlo,
+        Monaco,
+        Consolas,
+        'Liberation Mono',
+        'Courier New',
+        monospace;
+}
+```
+
+### When to Use System Fonts
+
+- High-performance applications
+- Content-heavy sites (blogs, documentation)
+- When brand fonts aren't critical
+- Mobile-first experiences
+
+---
+
+## 8.8 Reducing Layout Shift from Fonts
+
+### Use CSS `size-adjust`
+
+Match the fallback font size to your custom font:
+
+```css
+/* Prevent layout shift during font swap */
+@font-face {
+    font-family: 'CustomFont';
+    src: url('/fonts/custom.woff2') format('woff2');
+    font-display: swap;
+    size-adjust: 105%;  /* Adjust to match fallback */
+    ascent-override: 90%;
+    descent-override: 20%;
+    line-gap-override: 0%;
+}
+```
+
+### Using Fontaine (Automatic)
+
+```bash
+# Automatically generates fallback font metrics
+npx fontaine CustomFont.woff2
+```
+
+---
+
+## 8.9 Font Optimization Checklist
+
+```
+✅ Font Optimization Checklist:
+
+□ Use font-display: swap (or optional)
+□ Preload critical fonts (1-2 max)
+□ Self-host fonts instead of Google Fonts
+□ Use WOFF2 format only
+□ Subset fonts to needed characters
+□ Consider variable fonts for multiple weights
+□ Set up proper fallback font stack
+□ Use size-adjust to reduce layout shift
+□ Limit font families to 2-3 maximum
+□ Consider system fonts for max performance
+```
+
+---
+
+## 8.10 Key Takeaways ✨
+
+1. **`font-display: swap`** prevents invisible text
+2. **Preload** only 1-2 critical fonts
+3. **Self-host** for best performance
+4. **Subset** to remove unused characters
+5. **Variable fonts** = one file for all weights
+
+---
+
+# Section 9: Caching & Network Optimization
+
+## 9.1 Why Caching Matters
+
+Caching stores resources locally so they don't need to be downloaded again.
+
+```mermaid
+graph LR
+    A[User Requests Page] --> B{In Cache?}
+    B -->|Yes| C[Load from cache ⚡]
+    B -->|No| D[Download from server 🐌]
+    D --> E[Store in cache]
+    C --> F[Page Displayed]
+    E --> F
+    
+    style C fill:#4CAF50,color:white
+    style D fill:#F44336,color:white
+```
+
+**Impact of Caching:**
+
+| Scenario | Load Time |
+|----------|-----------|
+| First visit (no cache) | 3.5s |
+| Repeat visit (cached) | 0.5s |
+| Savings | **86% faster!** |
+
+---
+
+## 9.2 Browser Caching with HTTP Headers
+
+### Cache-Control Header
+
+```
+# Server configuration examples
+
+# Static assets (cache for 1 year)
+Cache-Control: public, max-age=31536000, immutable
+
+# HTML pages (always revalidate)
+Cache-Control: no-cache
+
+# API responses (don't cache)
+Cache-Control: no-store
+```
+
+### Cache-Control Directives
+
+| Directive | Meaning |
+|-----------|---------|
+| `public` | Can be cached by browsers AND CDNs |
+| `private` | Only browser can cache (not CDN) |
+| `max-age=N` | Cache for N seconds |
+| `no-cache` | Cache, but revalidate every time |
+| `no-store` | Don't cache at all |
+| `immutable` | Never revalidate (for versioned files) |
+
+### Recommended Caching Strategy
+
+```
+File Type            Cache-Control
+─────────────────────────────────────────────────────
+HTML                 no-cache
+CSS (versioned)      public, max-age=31536000, immutable
+JS (versioned)       public, max-age=31536000, immutable
+Images               public, max-age=31536000
+Fonts                public, max-age=31536000, immutable
+API responses        no-store (or short max-age)
+```
+
+### Implementation Examples
+
+**Nginx:**
+
+```nginx
+# nginx.conf
+location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff2)$ {
+    expires 1y;
+    add_header Cache-Control "public, max-age=31536000, immutable";
+}
+
+location ~* \.html$ {
+    add_header Cache-Control "no-cache";
+}
+```
+
+**Apache (.htaccess):**
+
+```apache
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType text/css "access plus 1 year"
+    ExpiresByType application/javascript "access plus 1 year"
+    ExpiresByType image/webp "access plus 1 year"
+</IfModule>
+```
+
+**Express.js:**
+
+```javascript
+const express = require('express');
+const app = express();
+
+// Static files with long cache
+app.use('/static', express.static('public', {
+    maxAge: '1y',
+    immutable: true
+}));
+
+// HTML with no-cache
+app.get('/', (req, res) => {
+    res.set('Cache-Control', 'no-cache');
+    res.sendFile('index.html');
+});
+```
+
+---
+
+## 9.3 Cache Busting for Updates
+
+If files are cached forever, how do you update them?
+
+### Filename Versioning
+
+```html
+<!-- Version in filename changes when content changes -->
+<link rel="stylesheet" href="styles.a1b2c3d4.css">
+<script src="app.e5f6g7h8.js"></script>
+
+<!-- When you update, hash changes automatically -->
+<link rel="stylesheet" href="styles.x9y8z7w6.css">
+```
+
+### Build Tool Configuration
+
+```javascript
+// webpack.config.js
+module.exports = {
+    output: {
+        filename: '[name].[contenthash].js',
+        chunkFilename: '[name].[contenthash].js'
+    }
+};
+```
+
+```javascript
+// vite.config.js
+export default {
+    build: {
+        rollupOptions: {
+            output: {
+                entryFileNames: '[name].[hash].js',
+                chunkFileNames: '[name].[hash].js',
+                assetFileNames: '[name].[hash].[ext]'
+            }
+        }
+    }
+};
+```
+
+---
+
+## 9.4 Service Workers
+
+Service workers enable **offline support** and **advanced caching strategies**.
+
+### Basic Service Worker Setup
+
+```javascript
+// Register service worker (in main.js)
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js')
+        .then(reg => console.log('SW registered'))
+        .catch(err => console.log('SW failed:', err));
+}
+```
+
+```javascript
+// sw.js - Service Worker file
+const CACHE_NAME = 'my-site-v1';
+const ASSETS = [
+    '/',
+    '/styles.css',
+    '/app.js',
+    '/offline.html'
+];
+
+// Install: Cache core assets
+self.addEventListener('install', event => {
+    event.waitUntil(
+        caches.open(CACHE_NAME)
+            .then(cache => cache.addAll(ASSETS))
+    );
+});
+
+// Fetch: Serve from cache, fall back to network
+self.addEventListener('fetch', event => {
+    event.respondWith(
+        caches.match(event.request)
+            .then(response => response || fetch(event.request))
+            .catch(() => caches.match('/offline.html'))
+    );
+});
+
+// Activate: Clean up old caches
+self.addEventListener('activate', event => {
+    event.waitUntil(
+        caches.keys().then(keys => {
+            return Promise.all(
+                keys.filter(key => key !== CACHE_NAME)
+                    .map(key => caches.delete(key))
+            );
+        })
+    );
+});
+```
+
+### Caching Strategies
+
+```mermaid
+graph TD
+    subgraph "Cache First"
+        A1[Request] --> B1{In Cache?}
+        B1 -->|Yes| C1[Return cached]
+        B1 -->|No| D1[Fetch & cache]
+    end
+    
+    subgraph "Network First"
+        A2[Request] --> B2[Try network]
+        B2 -->|Success| C2[Return & cache]
+        B2 -->|Fail| D2[Return cached]
+    end
+    
+    subgraph "Stale While Revalidate"
+        A3[Request] --> B3[Return cached immediately]
+        A3 --> C3[Update cache in background]
+    end
+```
+
+```javascript
+// Stale-While-Revalidate (best for most resources)
+self.addEventListener('fetch', event => {
+    event.respondWith(
+        caches.open(CACHE_NAME).then(cache => {
+            return cache.match(event.request).then(cached => {
+                const fetched = fetch(event.request).then(response => {
+                    cache.put(event.request, response.clone());
+                    return response;
+                });
+                return cached || fetched;
+            });
+        })
+    );
+});
+```
+
+---
+
+## 9.5 HTTP/2 and HTTP/3
+
+Modern protocols are significantly faster!
+
+### HTTP/1.1 vs HTTP/2
+
+```
+HTTP/1.1:                    HTTP/2:
+├── 1 request at a time      ├── Many requests at once
+├── Multiple connections     ├── Single connection
+├── Header repetition        ├── Header compression
+└── No prioritization        └── Stream prioritization
+
+[Request 1] ────────────►    [Request 1] ─►
+            [Request 2] ──►  [Request 2] ─►  All at once!
+                    [Req 3]► [Request 3] ─►
+```
+
+### Benefits of HTTP/2
+
+| Feature | Benefit |
+|---------|---------|
+| **Multiplexing** | Many requests on one connection |
+| **Header Compression** | Smaller requests |
+| **Server Push** | Send resources before asked |
+| **Stream Priority** | Important resources first |
+
+### HTTP/3 (QUIC)
+
+- Built on UDP (faster than TCP)
+- Better mobile performance
+- Faster connection establishment
+- Resilient to packet loss
+
+### Checking Your Protocol
+
+```javascript
+// In DevTools Console
+performance.getEntriesByType('navigation')[0].nextHopProtocol
+// Returns: "h2" (HTTP/2) or "h3" (HTTP/3)
+```
+
+---
+
+## 9.6 Compression (Gzip & Brotli)
+
+Compress text-based files for smaller transfers.
+
+### Compression Comparison
+
+```
+Original JavaScript:  500 KB
+Gzip compressed:      150 KB (70% reduction)
+Brotli compressed:    120 KB (76% reduction)
+```
+
+### Server Configuration
+
+**Nginx:**
+
+```nginx
+# Enable gzip
+gzip on;
+gzip_types text/plain text/css application/json application/javascript text/xml;
+gzip_min_length 1000;
+
+# Enable brotli (requires module)
+brotli on;
+brotli_types text/plain text/css application/json application/javascript;
+```
+
+**Apache:**
+
+```apache
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/css application/javascript
+</IfModule>
+```
+
+**Express.js:**
+
+```javascript
+const compression = require('compression');
+const app = require('express')();
+
+app.use(compression({
+    level: 6,  // Compression level (1-9)
+    filter: (req, res) => {
+        if (req.headers['x-no-compression']) return false;
+        return compression.filter(req, res);
+    }
+}));
+```
+
+### Checking Compression
+
+```bash
+# Check response headers
+curl -H "Accept-Encoding: gzip, br" -I https://example.com
+
+# Look for:
+# Content-Encoding: gzip
+# Content-Encoding: br (Brotli)
+```
+
+---
+
+## 9.7 CDN (Content Delivery Network)
+
+CDNs serve content from servers close to users.
+
+```mermaid
+graph TD
+    subgraph "Without CDN"
+        A1[User in Tokyo] --> B1[Server in New York]
+        C1[Latency: 200ms]
+    end
+    
+    subgraph "With CDN"
+        A2[User in Tokyo] --> B2[CDN Edge in Tokyo]
+        C2[Latency: 20ms]
+    end
+    
+    style C1 fill:#F44336,color:white
+    style C2 fill:#4CAF50,color:white
+```
+
+### CDN Benefits
+
+| Benefit | Description |
+|---------|-------------|
+| **Lower Latency** | Servers near users |
+| **High Availability** | Redundant servers |
+| **DDoS Protection** | Absorbs attacks |
+| **Automatic Optimization** | Image resizing, compression |
+| **Edge Caching** | Cache at edge locations |
+
+### Popular CDNs
+
+- **Cloudflare** - Free tier, great performance
+- **AWS CloudFront** - AWS ecosystem
+- **Fastly** - Instant purging
+- **Vercel Edge** - Serverless friendly
+- **Bunny CDN** - Cost-effective
+
+---
+
+## 9.8 Preconnect and DNS Prefetch
+
+Establish connections early for faster resource loading.
+
+```html
+<head>
+    <!-- DNS Prefetch: Resolve domain name -->
+    <link rel="dns-prefetch" href="https://analytics.example.com">
+    
+    <!-- Preconnect: DNS + TCP + TLS handshake -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://cdn.example.com" crossorigin>
+</head>
+```
+
+### When to Use Each
+
+| Hint | Use When |
+|------|----------|
+| `dns-prefetch` | You might use the domain |
+| `preconnect` | You will definitely use the domain soon |
+
+---
+
+## 9.9 Caching & Network Checklist
+
+```
+✅ Caching & Network Checklist:
+
+□ Set appropriate Cache-Control headers
+□ Use versioned filenames for cache busting
+□ Implement service worker for offline support
+□ Enable HTTP/2 or HTTP/3
+□ Enable Gzip/Brotli compression
+□ Use a CDN for static assets
+□ Preconnect to critical third-party origins
+□ DNS-prefetch for non-critical origins
+□ Set long cache times for static assets
+□ Use no-cache for HTML documents
+```
+
+---
+
+## 9.10 Key Takeaways ✨
+
+1. **Cache static assets for 1 year** with versioned filenames
+2. **Service workers** enable offline support and advanced caching
+3. **HTTP/2+** multiplexes requests for faster loading
+4. **Brotli compression** beats Gzip by ~20%
+5. **CDNs** reduce latency by serving from edge locations
+
+---
+
+# Section 10: Finding & Fixing Performance Issues
+
+## 10.1 Performance Debugging Workflow
+
+```mermaid
+flowchart TD
+    A[Run Lighthouse] --> B[Identify Top Issues]
+    B --> C{What's the problem?}
+    C -->|Slow LCP| D[Check images, fonts, blocking resources]
+    C -->|High CLS| E[Check image dimensions, dynamic content]
+    C -->|Poor INP| F[Check JavaScript, long tasks]
+    C -->|Slow TTFB| G[Check server, CDN, caching]
+    D --> H[Fix & Re-test]
+    E --> H
+    F --> H
+    G --> H
+    H --> A
+    
+    style A fill:#4CAF50,color:white
+    style H fill:#2196F3,color:white
+```
+
+---
+
+## 10.2 Finding Heavy Files
+
+### Using Network Tab
+
+```
+Step-by-Step:
+1. Open DevTools (F12)
+2. Go to Network tab
+3. Refresh page (Ctrl+R)
+4. Click "Size" column to sort by size
+5. Look for files > 100KB
+```
+
+### Quick Analysis Script
+
+Run this in DevTools Console to find heavy resources:
+
+```javascript
+// Find all resources and sort by size
+const resources = performance.getEntriesByType('resource');
+const sorted = resources
+    .map(r => ({
+        name: r.name.split('/').pop().substring(0, 40),
+        size: Math.round(r.transferSize / 1024) + ' KB',
+        time: Math.round(r.duration) + ' ms',
+        type: r.initiatorType
+    }))
+    .sort((a, b) => parseInt(b.size) - parseInt(a.size))
+    .slice(0, 10);
+
+console.table(sorted);
+```
+
+### What to Look For
+
+| File Size | Action |
+|-----------|--------|
+| > 500KB | 🔴 Critical - must optimize |
+| 100-500KB | 🟡 Review - can likely reduce |
+| < 100KB | 🟢 Acceptable |
+
+---
+
+## 10.3 Finding Render-Blocking Resources
+
+### Lighthouse Audit
+
+```
+1. Run Lighthouse
+2. Look for "Eliminate render-blocking resources"
+3. Click to expand the list
+4. Each resource shows potential savings
+```
+
+### Manual Detection
+
+```javascript
+// In DevTools Console - find blocking CSS
+document.querySelectorAll('link[rel="stylesheet"]').forEach(link => {
+    if (!link.media || link.media === 'all') {
+        console.log('🚫 Blocking:', link.href);
+    }
+});
+
+// Find blocking scripts
+document.querySelectorAll('script:not([async]):not([defer])').forEach(script => {
+    if (script.src) {
+        console.log('🚫 Blocking script:', script.src);
+    }
+});
+```
+
+### Fixing Render-Blocking Resources
+
+```html
+<!-- BEFORE: Blocking -->
+<link rel="stylesheet" href="styles.css">
+<script src="app.js"></script>
+
+<!-- AFTER: Non-blocking -->
+<style>/* Critical CSS inline */</style>
+<link rel="stylesheet" href="styles.css" media="print" onload="this.media='all'">
+<script src="app.js" defer></script>
+```
+
+---
+
+## 10.4 Finding Unused Code
+
+### Using Coverage Tab
+
+```
+Steps:
+1. Press Ctrl+Shift+P
+2. Type "coverage" → Show Coverage
+3. Click 🔴 Record
+4. Refresh and interact with page
+5. Review red (unused) vs green (used)
+```
+
+### Interpreting Results
+
+```
+Coverage Analysis:
+
+File                    Unused    Status
+─────────────────────────────────────────
+vendor.js               75%       🔴 Replace with lighter alternative
+app.js                  40%       🟡 Consider code splitting
+styles.css              60%       🟡 Use PurgeCSS
+utilities.css           30%       🟢 Acceptable
+```
+
+### Actions Based on Coverage
+
+| Unused % | Action |
+|----------|--------|
+| > 70% | Replace library or split bundle |
+| 40-70% | Code split or tree shake |
+| 20-40% | Consider PurgeCSS for CSS |
+| < 20% | Acceptable |
+
+---
+
+## 10.5 Debugging LCP Issues
+
+### Finding the LCP Element
+
+```javascript
+// Run in DevTools Console
+new PerformanceObserver((entryList) => {
+    for (const entry of entryList.getEntries()) {
+        console.log('LCP element:', entry.element);
+        console.log('LCP time:', entry.startTime, 'ms');
+        console.log('LCP size:', entry.size);
+    }
+}).observe({ type: 'largest-contentful-paint', buffered: true });
+```
+
+### Common LCP Problems & Fixes
+
+| Problem | Solution |
+|---------|----------|
+| Slow server response | Use CDN, optimize server |
+| Render-blocking resources | Inline critical CSS, defer JS |
+| Slow resource load | Preload LCP image, optimize size |
+| Client-side rendering | Use SSR or prerendering |
+
+### LCP Optimization Checklist
+
+```html
+<!-- Optimize LCP Image -->
+<link rel="preload" as="image" href="hero.webp">
+
+<img src="hero.webp" 
+     alt="Hero"
+     width="1200" height="600"
+     fetchpriority="high"
+     decoding="async">
+```
+
+---
+
+## 10.6 Debugging CLS Issues
+
+### Finding Layout Shifts
+
+```javascript
+// Track all layout shifts
+new PerformanceObserver((entryList) => {
+    for (const entry of entryList.getEntries()) {
+        if (!entry.hadRecentInput) {
+            console.log('Layout shift:', entry.value);
+            entry.sources?.forEach(source => {
+                console.log('Shifted element:', source.node);
+            });
+        }
+    }
+}).observe({ type: 'layout-shift', buffered: true });
+```
+
+### Common CLS Causes & Fixes
+
+| Cause | Fix |
+|-------|-----|
+| Images without dimensions | Add width/height attributes |
+| Ads/embeds without space | Reserve space with CSS |
+| Web fonts causing FOUT | Use font-display + size-adjust |
+| Dynamic content insertion | Reserve space or use transform |
+
+### CLS Fix Example
+
+```html
+<!-- BEFORE: Causes shift -->
+<img src="photo.jpg" alt="Photo">
+
+<!-- AFTER: No shift -->
+<img src="photo.jpg" alt="Photo" width="800" height="600">
+```
+
+```css
+/* Reserve space for ad */
+.ad-slot {
+    min-height: 250px;
+    background: #f0f0f0;
+}
+
+/* Use aspect-ratio for responsive */
+.video-container {
+    aspect-ratio: 16 / 9;
+    background: #000;
+}
+```
+
+---
+
+## 10.7 Debugging INP Issues
+
+### Finding Slow Interactions
+
+```javascript
+// Track all interactions
+new PerformanceObserver((entryList) => {
+    for (const entry of entryList.getEntries()) {
+        if (entry.duration > 200) {
+            console.log('Slow interaction:', entry.name);
+            console.log('Duration:', entry.duration, 'ms');
+            console.log('Processing:', entry.processingEnd - entry.processingStart, 'ms');
+        }
+    }
+}).observe({ type: 'event', buffered: true, durationThreshold: 16 });
+```
+
+### Finding Long Tasks
+
+```javascript
+// Track long tasks (>50ms)
+new PerformanceObserver((entryList) => {
+    for (const entry of entryList.getEntries()) {
+        console.log('Long task:', entry.duration, 'ms');
+        console.log('Attribution:', entry.attribution);
+    }
+}).observe({ type: 'longtask', buffered: true });
+```
+
+### INP Fixes
+
+```javascript
+// BEFORE: Long task blocks interaction
+button.addEventListener('click', () => {
+    for (let i = 0; i < 1000000; i++) {
+        heavyWork(i);
+    }
+    updateUI();
+});
+
+// AFTER: Chunked processing
+button.addEventListener('click', async () => {
+    updateUI('Processing...');
+    
+    for (let i = 0; i < 1000000; i += 1000) {
+        await new Promise(r => setTimeout(r, 0)); // Yield
+        for (let j = i; j < i + 1000; j++) {
+            heavyWork(j);
+        }
+    }
+    
+    updateUI('Done!');
+});
+```
+
+---
+
+## 10.8 Bundle Analysis
+
+### Webpack Bundle Analyzer
+
+```bash
+# Install
+npm install webpack-bundle-analyzer --save-dev
+
+# Add to package.json scripts
+"analyze": "webpack --profile --json > stats.json && webpack-bundle-analyzer stats.json"
+
+# Run
+npm run analyze
+```
+
+### What to Look For
+
+```
+Bundle Visualization:
+
+┌─────────────────────────────────────────────┐
+│                 main.js                      │
+├─────────────────────────────────────────────┤
+│ ┌─────────────────┐ ┌─────────────────────┐ │
+│ │    moment.js    │ │      lodash         │ │
+│ │     230KB       │ │       71KB          │ │
+│ │   🔴 REPLACE    │ │   🟡 TREE SHAKE     │ │
+│ └─────────────────┘ └─────────────────────┘ │
+│ ┌─────────────────┐ ┌─────────────────────┐ │
+│ │    your code    │ │    react + deps     │ │
+│ │      45KB       │ │       42KB          │ │
+│ │   ✅ GOOD       │ │   ✅ GOOD           │ │
+│ └─────────────────┘ └─────────────────────┘ │
+└─────────────────────────────────────────────┘
+```
+
+### Actions
+
+| Finding | Action |
+|---------|--------|
+| moment.js | Replace with date-fns (230KB → 10KB) |
+| Full lodash | Use lodash-es with tree shaking |
+| Large images in bundle | Move to public folder |
+| Duplicate dependencies | Check package-lock, dedupe |
+
+---
+
+## 10.9 Real-World Debugging Walkthrough
+
+### Step 1: Run Lighthouse
+
+```
+Score: 45 (Poor)
+
+Top Issues:
+1. Eliminate render-blocking resources (2.1s)
+2. Reduce unused JavaScript (1.5s)  
+3. Serve images in next-gen formats (0.8s)
+4. Largest Contentful Paint (4.2s)
+```
+
+### Step 2: Fix Render-Blocking CSS
+
+```html
+<!-- BEFORE -->
+<link rel="stylesheet" href="styles.css">
+
+<!-- AFTER -->
+<style>
+    /* Critical CSS inline */
+    .hero { min-height: 100vh; }
+    .nav { position: fixed; }
+</style>
+<link rel="preload" href="styles.css" as="style" onload="this.rel='stylesheet'">
+```
+
+### Step 3: Fix Large JavaScript
+
+```javascript
+// BEFORE: Import entire library
+import _ from 'lodash';
+
+// AFTER: Import only what's needed
+import debounce from 'lodash/debounce';
+```
+
+### Step 4: Optimize Images
+
+```html
+<!-- BEFORE -->
+<img src="hero.jpg">
+
+<!-- AFTER -->
+<picture>
+    <source srcset="hero.avif" type="image/avif">
+    <source srcset="hero.webp" type="image/webp">
+    <img src="hero.jpg" 
+         width="1200" height="600"
+         fetchpriority="high"
+         alt="Hero">
+</picture>
+```
+
+### Step 5: Re-test
+
+```
+New Score: 92 (Good!) 🎉
+
+Improvements:
+- LCP: 4.2s → 1.8s
+- TBT: 850ms → 120ms
+- CLS: 0.15 → 0.02
+```
+
+---
+
+## 10.10 Key Takeaways ✨
+
+1. **Start with Lighthouse** for an overview
+2. **Network tab** finds heavy files
+3. **Coverage tab** finds unused code
+4. **Performance Observer API** debugs specific metrics
+5. **Fix highest-impact issues first**
+
+---
+
+# Section 11: Advanced Techniques & Best Practices
+
+## 11.1 Performance Budget
+
+Set limits for your site's performance metrics.
+
+### Example Performance Budget
+
+| Metric | Budget | Action if Exceeded |
+|--------|--------|-------------------|
+| Total JavaScript | < 300KB | Code split or remove features |
+| Total CSS | < 100KB | Remove unused, split critical |
+| LCP | < 2.5s | Optimize images, server |
+| Total Page Weight | < 1.5MB | Compress, remove unnecessary |
+| HTTP Requests | < 50 | Combine, lazy load |
+
+### Implementing Budget Checks
+
+```javascript
+// webpack.config.js
+module.exports = {
+    performance: {
+        maxAssetSize: 300000, // 300KB
+        maxEntrypointSize: 500000, // 500KB
+        hints: 'error' // Fail build if exceeded
+    }
+};
+```
+
+```bash
+# Using bundlesize
+npm install bundlesize --save-dev
+```
+
+```json
+// package.json
+{
+    "bundlesize": [
+        { "path": "dist/*.js", "maxSize": "300 kB" },
+        { "path": "dist/*.css", "maxSize": "50 kB" }
+    ]
+}
+```
+
+---
+
+## 11.2 Priority Hints
+
+Tell the browser what's most important.
+
+```html
+<!-- High priority: LCP image -->
+<img src="hero.jpg" fetchpriority="high">
+
+<!-- Low priority: Below-fold images -->
+<img src="footer.jpg" fetchpriority="low" loading="lazy">
+
+<!-- High priority: Critical script -->
+<script src="critical.js" fetchpriority="high"></script>
+
+<!-- Low priority: Analytics -->
+<script src="analytics.js" fetchpriority="low" async></script>
+
+<!-- High priority: Preload -->
+<link rel="preload" href="font.woff2" as="font" fetchpriority="high">
+```
+
+---
+
+## 11.3 Resource Hints Advanced Usage
+
+### Speculation Rules (Prefetch/Prerender)
+
+```html
+<script type="speculationrules">
+{
+    "prefetch": [
+        { "source": "list", "urls": ["/about", "/products"] }
+    ],
+    "prerender": [
+        { "source": "list", "urls": ["/checkout"] }
+    ]
+}
+</script>
+```
+
+### Module Preload
+
+```html
+<!-- Preload ES modules -->
+<link rel="modulepreload" href="/js/app.mjs">
+<link rel="modulepreload" href="/js/utils.mjs">
+```
+
+---
+
+## 11.4 Server-Side Optimizations Overview
+
+### Server Response Time
+
+| Optimization | Impact |
+|--------------|--------|
+| Use a CDN | 50-200ms reduction |
+| Database query optimization | Variable |
+| Caching at server level | Significant |
+| Upgrade server hardware | Variable |
+| Use HTTP/2+ | Multiplexing benefits |
+
+### Static Site Generation (SSG)
+
+```javascript
+// Next.js example
+export async function getStaticProps() {
+    const data = await fetchData();
+    return { props: { data } };
+}
+
+// Pages are pre-built at build time
+// No server processing on each request
+```
+
+### Server-Side Rendering (SSR)
+
+```javascript
+// Next.js example
+export async function getServerSideProps() {
+    const data = await fetchData();
+    return { props: { data } };
+}
+
+// Faster initial render than client-side
+// Better LCP for dynamic content
+```
+
+---
+
+## 11.5 Monitoring & Continuous Improvement
+
+### Real User Monitoring (RUM)
+
+```javascript
+// Send Core Web Vitals to analytics
+import { onCLS, onINP, onLCP } from 'web-vitals';
+
+function sendToAnalytics({ name, delta, id }) {
+    gtag('event', name, {
+        event_category: 'Web Vitals',
+        value: Math.round(name === 'CLS' ? delta * 1000 : delta),
+        event_label: id,
+        non_interaction: true,
+    });
+}
+
+onCLS(sendToAnalytics);
+onINP(sendToAnalytics);
+onLCP(sendToAnalytics);
+```
+
+### Monitoring Tools
+
+| Tool | Type | Best For |
+|------|------|----------|
+| Google Search Console | Field | SEO + Core Web Vitals |
+| PageSpeed Insights | Lab + Field | Quick analysis |
+| Chrome UX Report | Field | Real user data |
+| SpeedCurve | Synthetic | Continuous monitoring |
+| Sentry | RUM | Error + Performance |
+
+---
+
+## 11.6 Performance Testing in CI/CD
+
+### Lighthouse CI
+
+```yaml
+# .github/workflows/lighthouse.yml
+name: Lighthouse CI
+on: push
+jobs:
+  lighthouse:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Run Lighthouse
+        uses: treosh/lighthouse-ci-action@v10
+        with:
+          urls: |
+            https://example.com/
+            https://example.com/products
+          budgetPath: ./budget.json
+          uploadArtifacts: true
+```
+
+```json
+// budget.json
+[
+    {
+        "path": "/*",
+        "resourceSizes": [
+            { "resourceType": "script", "budget": 300 },
+            { "resourceType": "stylesheet", "budget": 100 }
+        ],
+        "timings": [
+            { "metric": "largest-contentful-paint", "budget": 2500 }
+        ]
+    }
+]
+```
+
+---
+
+## 11.7 Quick Reference Checklists
+
+### Initial Load Optimization
+
+```
+□ Inline critical CSS
+□ Defer/async all JavaScript
+□ Preload LCP image
+□ Preconnect to critical origins
+□ Use modern image formats (WebP/AVIF)
+□ Lazy load below-fold images
+□ Set image dimensions
+□ Minimize third-party scripts
+□ Enable compression (Brotli)
+□ Use a CDN
+```
+
+### Runtime Performance
+
+```
+□ Break up long tasks (< 50ms)
+□ Use requestIdleCallback for non-critical work
+□ Debounce scroll/resize handlers
+□ Use CSS transforms for animations
+□ Avoid layout thrashing
+□ Use Web Workers for heavy computation
+□ Virtualize long lists
+□ Cache DOM references
+```
+
+### Caching Strategy
+
+```
+□ Version static assets in filename
+□ Set Cache-Control: max-age=31536000 for static
+□ Set Cache-Control: no-cache for HTML
+□ Implement service worker
+□ Use stale-while-revalidate strategy
+□ Set up CDN caching rules
+```
+
+---
+
+## 11.8 Common Mistakes to Avoid
+
+| ❌ Mistake | ✅ Better Approach |
+|-----------|-------------------|
+| Lazy loading LCP image | Use `fetchpriority="high"` |
+| Loading all JS upfront | Code split by route |
+| Using moment.js | Use date-fns or native |
+| No image dimensions | Always set width/height |
+| Blocking third-party scripts | Load async after page load |
+| Large hero images | Use responsive images |
+| CSS in JS for critical styles | Inline critical CSS |
+| Not using a CDN | Always use CDN for static assets |
+
+---
+
+## 11.9 Further Learning Resources
+
+### Official Documentation
+
+- [web.dev](https://web.dev) - Google's web performance resource
+- [MDN Web Docs](https://developer.mozilla.org) - Comprehensive references
+- [Chrome DevTools Docs](https://developer.chrome.com/docs/devtools)
+
+### Tools
+
+- [PageSpeed Insights](https://pagespeed.web.dev)
+- [WebPageTest](https://webpagetest.org)
+- [Lighthouse](https://developers.google.com/web/tools/lighthouse)
+- [Squoosh](https://squoosh.app) - Image optimization
+
+### Learning
+
+- [Web Vitals](https://web.dev/vitals) - Core metrics guide
+- [Performance Patterns](https://www.patterns.dev) - Modern patterns
+- [HTTP Archive](https://httparchive.org) - Web trends data
+
+---
+
+## 11.10 Final Summary: The Performance Optimization Mindset
+
+```mermaid
+mindmap
+    root((Web Performance))
+        Loading
+            Reduce bytes
+            Minimize requests
+            Optimize order
+            Cache everything
+        Rendering
+            Critical CSS inline
+            Defer non-critical
+            Avoid blocking
+            Reserve space
+        Interaction
+            Short tasks
+            Yield to main thread
+            Use Web Workers
+            Efficient updates
+        Monitoring
+            Set budgets
+            Track real users
+            Continuous testing
+            Iterate and improve
+```
+
+### The Golden Rules
+
+1. **Measure first** – Don't optimize blindly
+2. **Focus on user experience** – Core Web Vitals matter
+3. **Load what you need** – Code split, lazy load
+4. **Optimize the critical path** – First paint matters most
+5. **Cache aggressively** – Repeat visits should be instant
+6. **Monitor continuously** – Performance is ongoing
+
+---
+
+## 🎉 Congratulations
+
+You've completed the comprehensive web performance optimization guide!
+
+**What you learned:**
+
+- Core Web Vitals (LCP, INP, CLS) and how to optimize them
+- Tools: Lighthouse, DevTools, PageSpeed Insights
+- Critical Rendering Path optimization
+- HTML, CSS, and JavaScript optimization techniques
+- Image and font optimization
+- Caching and network optimization
+- Debugging and fixing performance issues
+- Best practices for continuous improvement
+
+**Next steps:**
+
+1. Audit your site with Lighthouse
+2. Fix the top 3 issues
+3. Set up performance budgets
+4. Monitor with Real User Monitoring
+5. Keep iterating!
+
+> **Remember:** Performance is a journey, not a destination. Keep measuring, keep optimizing! 🚀
+
+---
+
+*End of Guide*
