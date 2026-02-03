@@ -31,12 +31,12 @@ flowchart LR
     D --> E[Deployment]
     E --> F[Maintenance]
     
-    style A fill:#f44336,color:white
-    style B fill:#ff9800,color:white
+    style A fill:#f44336
+    style B fill:#ff9800
     style C fill:#ffeb3b,color:black
-    style D fill:#4caf50,color:white
-    style E fill:#2196f3,color:white
-    style F fill:#9c27b0,color:white
+    style D fill:#4caf50
+    style E fill:#2196f3
+    style F fill:#9c27b0
 ```
 
 **Problems with Waterfall:**
@@ -600,9 +600,9 @@ flowchart TD
     E --> M[CI/CD]
     E --> N[Pairing]
     
-    style F fill:#4CAF50,color:white
-    style J fill:#2196F3,color:white
-    style G fill:#FF9800,color:white
+    style F fill:#4CAF50
+    style J fill:#2196F3
+    style G fill:#FF9800
 ```
 
 ### Framework vs. Practices vs. Mindset
@@ -734,7 +734,7 @@ graph TD
     A --> E[Courage]
     A --> F[Respect]
     
-    style A fill:#FF9800,color:white
+    style A fill:#FF9800
 ```
 
 | Value | Description |
@@ -799,8 +799,8 @@ flowchart LR
     D --> E[Build by Feature]
     E --> D
     
-    style A fill:#9C27B0,color:white
-    style E fill:#4CAF50,color:white
+    style A fill:#9C27B0
+    style E fill:#4CAF50
 ```
 
 ### FDD Phases
@@ -860,8 +860,8 @@ graph TD
     
     style B fill:#f0f0f0,color:black
     style C fill:#ffeb3b,color:black
-    style D fill:#ff9800,color:white
-    style E fill:#f44336,color:white
+    style D fill:#ff9800
+    style E fill:#f44336
 ```
 
 ### Crystal Properties
@@ -965,7 +965,7 @@ graph TD
     A --> G[Build Integrity In]
     A --> H[Optimize the Whole]
     
-    style A fill:#4CAF50,color:white
+    style A fill:#4CAF50
 ```
 
 ### The Seven Wastes of Software Development
@@ -1020,9 +1020,9 @@ flowchart TD
     H -->|Yes| I[Consider FDD]
     H -->|No| J[Crystal Clear]
     
-    style C fill:#4CAF50,color:white
-    style G fill:#2196F3,color:white
-    style E fill:#FF9800,color:white
+    style C fill:#4CAF50
+    style G fill:#2196F3
+    style E fill:#FF9800
 ```
 
 ### Decision Matrix
@@ -1105,7 +1105,7 @@ graph TD
     C --> F[Regularly check progress]
     D --> G[Adjust based on findings]
     
-    style A fill:#4CAF50,color:white
+    style A fill:#4CAF50
 ```
 
 ### The Three Pillars
@@ -1138,7 +1138,7 @@ flowchart TB
     B --> C
     H --> B
     
-    style G fill:#4CAF50,color:white
+    style G fill:#4CAF50
 ```
 
 ---
@@ -1159,9 +1159,9 @@ graph TD
     B --> E[HOW to work together]
     C --> F[HOW to build it]
     
-    style A fill:#2196F3,color:white
-    style B fill:#FF9800,color:white
-    style C fill:#4CAF50,color:white
+    style A fill:#2196F3
+    style B fill:#FF9800
+    style C fill:#4CAF50
 ```
 
 ### Product Owner
@@ -1357,7 +1357,7 @@ flowchart TD
     G -->|No| C
     G -->|Yes| H[End - Exactly 15 min]
     
-    style H fill:#4CAF50,color:white
+    style H fill:#4CAF50
 ```
 
 ### Common Anti-Patterns
@@ -1428,7 +1428,7 @@ flowchart LR
     C[What can we improve?] --> D
     D --> E[Implement in next Sprint]
     
-    style D fill:#4CAF50,color:white
+    style D fill:#4CAF50
 ```
 
 ### Popular Retrospective Formats
@@ -1656,7 +1656,7 @@ graph TD
     E --> E1[Make hard decisions]
     F --> F1[Value each contribution]
     
-    style A fill:#FF9800,color:white
+    style A fill:#FF9800
 ```
 
 ### XP Principles
@@ -1766,7 +1766,7 @@ flowchart TD
     C1 --> C2[Daily Builds]
     C2 --> C3[Continuous Integration]
     
-    style D fill:#4CAF50,color:white
+    style D fill:#4CAF50
 ```
 
 ### XP Iteration (Weekly Cycle)
@@ -2111,9 +2111,9 @@ flowchart TD
     G -->|Yes| E
     G -->|No| H[Either works - try Scrumban]
     
-    style C fill:#4CAF50,color:white
-    style E fill:#2196F3,color:white
-    style H fill:#FF9800,color:white
+    style C fill:#4CAF50
+    style E fill:#2196F3
+    style H fill:#FF9800
 ```
 
 ### Best Fit Scenarios
@@ -2484,7 +2484,7 @@ flowchart LR
     D[Same behavior] -.-> A
     D -.-> C
     
-    style C fill:#4CAF50,color:white
+    style C fill:#4CAF50
 ```
 
 ### Why Refactoring Matters
@@ -2674,8 +2674,8 @@ flowchart LR
     E -->|Yes| F[✅ Success]
     E -->|No| G[❌ Fix Immediately]
     
-    style F fill:#4CAF50,color:white
-    style G fill:#f44336,color:white
+    style F fill:#4CAF50
+    style G fill:#f44336
 ```
 
 ### CI Principles
@@ -3026,9 +3026,9 @@ graph TB
     
     A --> B --> C
     
-    style A fill:#f44336,color:white
-    style B fill:#ff9800,color:white
-    style C fill:#4CAF50,color:white
+    style A fill:#f44336
+    style B fill:#ff9800
+    style C fill:#4CAF50
 ```
 
 ### Types of Tests in Agile
@@ -3074,9 +3074,9 @@ flowchart TD
     B --> C[REFACTOR<br/>Clean up code]
     C --> A
     
-    style A fill:#f44336,color:white
-    style B fill:#4CAF50,color:white
-    style C fill:#2196F3,color:white
+    style A fill:#f44336
+    style B fill:#4CAF50
+    style C fill:#2196F3
 ```
 
 ### TDD Rules

@@ -79,9 +79,9 @@ graph LR
         CLS[📐 CLS<br/>Cumulative Layout Shift<br/><b>Visual Stability</b>]
     end
     
-    style LCP fill:#4CAF50,color:white
-    style INP fill:#2196F3,color:white
-    style CLS fill:#FF9800,color:white
+    style LCP fill:#4CAF50
+    style INP fill:#2196F3
+    style CLS fill:#FF9800
 ```
 
 ---
@@ -374,8 +374,8 @@ graph TB
     B --> |Real-time| Results2[Debugging Data]
     D --> |Real Users| Results3[CrUX Data]
     
-    style A fill:#4CAF50,color:white
-    style D fill:#2196F3,color:white
+    style A fill:#4CAF50
+    style D fill:#2196F3
 ```
 
 **Lab vs Field Data:**
@@ -483,8 +483,8 @@ flowchart TD
     E --> F[Re-run Lighthouse]
     F --> B
     
-    style A fill:#4CAF50,color:white
-    style C fill:#4CAF50,color:white
+    style A fill:#4CAF50
+    style C fill:#4CAF50
 ```
 
 ---
@@ -694,8 +694,8 @@ graph TB
         C --> E[Opportunities]
     end
     
-    style B fill:#2196F3,color:white
-    style C fill:#4CAF50,color:white
+    style B fill:#2196F3
+    style C fill:#4CAF50
 ```
 
 ### Reading PSI Results
@@ -790,9 +790,9 @@ graph LR
     G --> H[Composite]
     H --> I[👁️ Pixels!]
     
-    style A fill:#E91E63,color:white
-    style C fill:#2196F3,color:white
-    style I fill:#4CAF50,color:white
+    style A fill:#E91E63
+    style C fill:#2196F3
+    style I fill:#4CAF50
 ```
 
 ---
@@ -893,7 +893,7 @@ graph LR
     B[CSSOM] --> C
     C --> D["Only visible<br/>elements with<br/>computed styles"]
     
-    style C fill:#9C27B0,color:white
+    style C fill:#9C27B0
 ```
 
 **What's NOT in the Render Tree:**
@@ -983,7 +983,7 @@ graph TB
     D --> E
     E --> F[Final Display]
     
-    style E fill:#FF5722,color:white
+    style E fill:#FF5722
 ```
 
 **Elements that get their own layer:**
@@ -1014,9 +1014,9 @@ flowchart TD
     J --> K[📦 Composite]
     K --> L[👁️ Display]
     
-    style A fill:#E91E63,color:white
-    style F fill:#2196F3,color:white
-    style L fill:#4CAF50,color:white
+    style A fill:#E91E63
+    style F fill:#2196F3
+    style L fill:#4CAF50
 ```
 
 ---
@@ -1038,9 +1038,9 @@ graph TD
     D --> G[JS Executed]
     G --> A
     
-    style C fill:#F44336,color:white
-    style D fill:#F44336,color:white
-    style E fill:#4CAF50,color:white
+    style C fill:#F44336
+    style D fill:#F44336
+    style E fill:#4CAF50
 ```
 
 ### CSS is Render-Blocking
@@ -1293,8 +1293,8 @@ graph TD
     C --> E
     D --> E
     
-    style A fill:#4CAF50,color:white
-    style E fill:#2196F3,color:white
+    style A fill:#4CAF50
+    style E fill:#2196F3
 ```
 
 ---
@@ -1376,8 +1376,8 @@ graph LR
         G[prefetch] --> H[Load NEXT PAGE resource]
     end
     
-    style E fill:#4CAF50,color:white
-    style C fill:#2196F3,color:white
+    style E fill:#4CAF50
+    style C fill:#2196F3
 ```
 
 ---
@@ -1731,8 +1731,8 @@ graph LR
     B -->|Yes| D[🎨 Render!]
     C --> B
     
-    style C fill:#F44336,color:white
-    style D fill:#4CAF50,color:white
+    style C fill:#F44336
+    style D fill:#4CAF50
 ```
 
 **Impact of CSS on Performance:**
@@ -2254,8 +2254,8 @@ graph TD
     C -->|CPU| H[⏱️ 100ms]
     D -->|CPU| I[⏱️ 300ms]
     
-    style A fill:#FF5722,color:white
-    style D fill:#F44336,color:white
+    style A fill:#FF5722
+    style D fill:#F44336
 ```
 
 **The Cost of JavaScript:**
@@ -2349,8 +2349,8 @@ graph LR
     D --> G
     E --> G
     
-    style A fill:#F44336,color:white
-    style B fill:#4CAF50,color:white
+    style A fill:#F44336
+    style B fill:#4CAF50
 ```
 
 ### Dynamic Imports (Lazy Loading)
@@ -2523,8 +2523,8 @@ graph LR
     C --> E[Finally responds]
     D --> E
     
-    style C fill:#F44336,color:white
-    style D fill:#4CAF50,color:white
+    style C fill:#F44336
+    style D fill:#4CAF50
 ```
 
 ### Breaking Up Long Tasks
@@ -2912,8 +2912,8 @@ flowchart TD
     I -->|Modern| M[Use AVIF with WebP fallback]
     I -->|Legacy| N[Use WebP with JPEG fallback]
     
-    style C fill:#4CAF50,color:white
-    style M fill:#4CAF50,color:white
+    style C fill:#4CAF50
+    style M fill:#4CAF50
 ```
 
 ---
@@ -3649,8 +3649,8 @@ graph LR
     C --> F[Page Displayed]
     E --> F
     
-    style C fill:#4CAF50,color:white
-    style D fill:#F44336,color:white
+    style C fill:#4CAF50
+    style D fill:#F44336
 ```
 
 **Impact of Caching:**
@@ -4015,8 +4015,8 @@ graph TD
         C2[Latency: 20ms]
     end
     
-    style C1 fill:#F44336,color:white
-    style C2 fill:#4CAF50,color:white
+    style C1 fill:#F44336
+    style C2 fill:#4CAF50
 ```
 
 ### CDN Benefits
@@ -4110,8 +4110,8 @@ flowchart TD
     G --> H
     H --> A
     
-    style A fill:#4CAF50,color:white
-    style H fill:#2196F3,color:white
+    style A fill:#4CAF50
+    style H fill:#2196F3
 ```
 
 ---
