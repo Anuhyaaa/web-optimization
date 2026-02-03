@@ -48,21 +48,25 @@ User Experience:        Business Impact:         SEO Impact:
 ### Key Performance Metrics
 
 ```mermaid
-mindmap
-    root((Performance Metrics))
-        Loading
-            TTFB
-            FCP
-            LCP
-        Interactivity
-            FID
-            INP
-            TBT
-        Visual Stability
-            CLS
-        Custom
-            Speed Index
-            TTI
+flowchart TB
+    PM[Performance Metrics]
+    PM --> L[Loading]
+    PM --> I[Interactivity]
+    PM --> VS[Visual Stability]
+    PM --> C[Custom]
+    
+    L --> TTFB[TTFB]
+    L --> FCP[FCP]
+    L --> LCP[LCP]
+    
+    I --> FID[FID]
+    I --> INP[INP]
+    I --> TBT[TBT]
+    
+    VS --> CLS[CLS]
+    
+    C --> SI[Speed Index]
+    C --> TTI[TTI]
 ```
 
 ### Core Web Vitals
